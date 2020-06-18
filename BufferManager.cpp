@@ -1,27 +1,15 @@
 /*
  * File name: BufferManager.cpp
  * Author: Xuanming, Liu
- * Latest revised: 2020.05.31 
+ * Latest revised: 2020.06.18
  * Description: 
  * Implementation for BufferManagement.
 **/
 #include "BufferManager.h"
 
-Page BufferManager::cachePages[CACHE_CAPACITY];
-bool BufferManager::pined[CACHE_CAPACITY];
-bool BufferManager::isDirty[CACHE_CAPACITY];
-int  BufferManager::lruCounter[CACHE_CAPACITY];
-
-map<string, FileHandle> BufferManager::tableFileHandles;
-map<pair<string, string>, FileHandle> BufferManager::indexFileHandles;
-
-const string BufferManager::recordFilesDirectory = "RecordFiles";
-const string BufferManager::indexFilesDirectory = "IndexFiles";
-
 bool BufferManager::readPage( Page& page )
 {
-    // TODO: try catch
-	assert(page.pageIndex == PageType::Undefined)
+	assert(page.pageIndex == PageType::Undefined);
     int pageIndex = findPageInCache(page);
     if( pageIndex != PAGE_NOTFOUND ) {
         // read directly from cache.
@@ -59,11 +47,12 @@ bool BufferManager::writePage( Page& page )
         return true;
     }
     else {
-        forceWritePageToFile(page);// May cause bug
         pageIndex = getUnpinedBiggestPageFromCache();
-        if (pageIndex == -1) {
+        if (pageIndex == PAGE_NOTFOUND) {
+            forceWritePageToFile(page);// May cause bug
             return true;
-        } else {
+        } 
+        else {
             if (isDirty[pageIndex]) {
                 isDirty[pageIndex] = false;
                 forceWritePageToFile(cachePages[pageIndex]);
@@ -74,6 +63,40 @@ bool BufferManager::writePage( Page& page )
         }
     }
     return false;
+}
+
+Page& BufferManager::recordManagerGetBlankPage() 
+{
+    Page* newPage = new Page();
+    newPage->pageType = PageType::RecordPage;
+    Page& newPageRef = (*newPage);
+    return newPageRef;
+}
+
+bool BufferManager::pinPage(Page &page)
+{
+    int retFlag = false;
+    for (int i = 0; i < CACHE_CAPACITY; ++i) {
+        if (cachePages[i] == page) {
+            pined[i] = true;
+            retFlag = true;
+            break;
+        }
+    }
+    return retFlag;
+}
+
+bool BufferManager::unpinPage(Page &page)
+{
+    int retFlag = false;
+    for (int i = 0; i < CACHE_CAPACITY; ++i) {
+        if (cachePages[i] == page) {
+            pined[i] = false;
+            retFlag = true;
+            break;
+        }
+    }
+    return retFlag;
 }
 
 PageIndex BufferManager::findPageInCache( Page& page )
@@ -95,18 +118,29 @@ void BufferManager::lruCounterAddExceptCurrent( int index )
     lruCounter[index] = 0;
 }
 
+
 bool BufferManager::forceReadPageFromFile( Page& page )
 {
-    getPageFile(page);
-    lseek(page.fileHandle, page.pageIndex * PAGE_SIZE, SEEK_SET);
-    return read(page.fileHandle, page.pageData, PAGE_SIZE) != -1;
+    string filename = (page.tableName + "." + "record");
+    FILE* fp = fopen(filename.c_str(), "rb");
+    if (fp) {
+	    fread( page.pageData, PAGE_SIZE, 1, fp);
+	    fclose(fp);
+        return true;
+    }
+    return false;
 }
 
 bool BufferManager::forceWritePageToFile( Page& page )
 {
-    getPageFile(page);
-    lseek(page.fileHandle, page.pageIndex * PAGE_SIZE, SEEK_SET);
-    return write(page.fileHandle, page.pageData, PAGE_SIZE) != -1;
+    string filename = (page.tableName + "." + "record");
+    FILE* fp = fopen(filename.c_str(), "rb+");
+	if (fp) {
+		fwrite( page.pageData, PAGE_SIZE, 1, fp);
+		fclose(fp);
+        return true;
+	}
+    return false;
 }
 
 PageIndex BufferManager::getUnpinedBiggestPageFromCache()
@@ -120,39 +154,6 @@ PageIndex BufferManager::getUnpinedBiggestPageFromCache()
         }
     }
     return retIndex;
-}
-
-void BufferManager::getPageFile( Page& page )
-{
-    switch (page.pageType) {
-        case PageType::IndexPage: {
-            if (tableFileHandles.find(page.tableName) == tableFileHandles.end())
-                // If not found in map
-                assert(openTableFile(page.tableName) == true);
-            page.fileHandle = tableFileHandles[page.tableName];
-        }
-            break;
-        case PageType::RecordPage: {
-
-        }
-            break;
-        default:
-            break;
-    }
-}
-
-bool BufferManager::openTableFile(string tableName)
-{
-    string filePath = recordFilesDirectory + "/" + tableName + ".db";
-    if (tableFileHandles.find(tableName) == tableFileHandles.end()) {
-        int fileHandle = open(filePath.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-        if (fileHandle < 0) return false;
-        tableFileHandles[tableName] = fileHandle;
-        makeTwoPages(fileHandle);
-        return true;
-    }
-    cout << "File " << filePath << " " << "already opened" << endl;
-    return false;   
 }
 
 

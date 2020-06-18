@@ -48,17 +48,6 @@ enum PageType {
     IndexPage,
 };
 
-class Table
-{
-public:
-	string name;
-	int blockNum;
-	int attriNum;
-	int totalLength;
-	vector<Attribute> attributes;
-	Table() : blockNum(0), attriNum(0), totalLength(0) {}
-};
-
 class Attribute
 {
 public:
@@ -74,6 +63,17 @@ public:
 	}
 	Attribute(string n, int t, int l, bool isP, bool isU)
 		:name(n), type(t), length(l), isPrimeryKey(isP), isUnique(isU) {}
+};
+
+class Table
+{
+public:
+	string name;
+	int blockNum;
+	int attriNum;
+	int totalLength;
+	vector<Attribute> attributes;
+	Table() : blockNum(0), attriNum(0), totalLength(0) {}
 };
 
 class Index

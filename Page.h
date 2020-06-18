@@ -15,15 +15,13 @@ using namespace std;
 
 class Page{
 public:
-    string tableName, attributeName;
+    string tableName;
     PageType pageType;
     PageIndex pageIndex;
-    FileHandle fileHandle;
     char pageData[PAGE_SIZE];
 
     Page() {
         tableName = "";
-        attributeName = "";
         pageType = PageType::Undefined;
         pageIndex = -1;
         memset(pageData, '@', PAGE_SIZE);
@@ -34,7 +32,7 @@ public:
 
     // compare two page.
     bool operator==(const Page& page) {
-        return (this->attributeName == page.attributeName) && (this->tableName == page.tableName) && (this->pageType == page.pageType) && (this->pageIndex == page.pageIndex);
+        return (this->tableName == page.tableName) && (this->pageType == page.pageType) && (this->pageIndex == page.pageIndex);
     }
 };
 

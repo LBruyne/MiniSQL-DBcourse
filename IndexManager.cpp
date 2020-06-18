@@ -1,3 +1,11 @@
+/*
+ * File name: BufferManager.cpp
+ * Author: Xuanming, Liu
+ * Latest revised: 2020.06.18 
+ * Description: 
+ * Implementation for IndexManagement and B+ tree.
+**/
+
 #include "IndexManager.h"
 #include "BPlusTree.h"
 

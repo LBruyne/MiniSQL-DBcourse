@@ -1,7 +1,7 @@
 /*
  * File name: BufferManager.h
  * Author: Xuanming, Liu
- * Latest revised: 2020.05.31 
+ * Latest revised: 2020.06.18
  * Description: 
  * Header for BM module.
  * Served as management for buffer.
@@ -26,12 +26,6 @@ private:
     static bool pined[CACHE_CAPACITY];
     static bool isDirty[CACHE_CAPACITY];
 
-    static const string recordFilesDirectory;
-    static const string indexFilesDirectory;
-
-    static map<string, FileHandle> tableFileHandles;
-    static map<pair<string, string>, FileHandle> indexFileHandles;
-
 public:
     BufferManager(){
         memset(lruCounter, 0, CACHE_CAPACITY);
@@ -39,16 +33,22 @@ public:
         memset(isDirty, false, CACHE_CAPACITY);
     }
 
+    ~BufferManager(){
+        for( int i = 0; i < CACHE_CAPACITY; i++) 
+            forceWritePageToFile (cachePages[i]);
+    }
+
     bool readPage( Page& );
     bool writePage( Page& );
+    Page& recordManagerGetBlankPage();
+    bool pinPage( Page& );
+    bool unpinPage( Page& );
 
 private:
-    void getPageFile( Page& );
     PageIndex findPageInCache( Page& );
     bool forceReadPageFromFile( Page& );
     bool forceWritePageToFile( Page& );
     void lruCounterAddExceptCurrent( int );
-    bool openTableFile( string );
     PageIndex getUnpinedBiggestPageFromCache();
 
 };
