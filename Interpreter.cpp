@@ -231,7 +231,7 @@ void Interpreter::Create_Index()
 	id.table_name = table_name;
 	CatalogManager cat;
 	tab = cat.getTable_info(table_name);
-	id.column = cat.GetColumnNumber(tab, attribute_name);
+	id.column = cat.getAttr_no(tab, attribute_name);
 	id.columnLength = tab.attributes[id.column].length;
 	cat.createIndex(id);
 }
@@ -334,7 +334,7 @@ void Interpreter::Select()
 			attribute_name = temp[1 + 4 * k];
 			int attr_no;
 			tab = cat.getTable_info(table_name);
-			attr_no = cat.GetColumnNumber(tab, attribute_name);
+			attr_no = cat.getAttr_no(tab, attribute_name);
 			con.columnNum = attr_no;
 
 			if (temp[2 + 4 * k] == "<")
@@ -426,7 +426,7 @@ void Interpreter::Insert()
 	}
 	//cout << comma_num << endl;
 
-	if (comma_num != cat.GetColumnAmount(tab) - 1)
+	if (comma_num != cat.getAttr_size(tab) - 1)
 	{
 		cout << "Invalid Query of the Number of the Values!4";
 		//throw Exception("Invalid Query of the Number of the Values!");
@@ -499,7 +499,7 @@ void Interpreter::Delete()
 		int attr_no;
 		
 		tab = cat.getTable_info(table_name);
-		attr_no = cat.GetColumnNumber(tab, attribute_name);
+		attr_no = cat.getAttr_no(tab, attribute_name);
 		con.columnNum = attr_no;
 
 		if (temp[2] == "<")

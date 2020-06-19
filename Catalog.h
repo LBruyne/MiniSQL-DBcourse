@@ -52,9 +52,9 @@ public:
 
 	Index getIndex_info(string index_name);
 
-	int GetColumnNumber(Table& table, string columnname);
+	int getAttr_no(Table& table, string attr_name);
 
-	int GetColumnAmount(Table& table);
+	int getAttr_size(Table& table);
 
 	void ShowTableCatalog();
 

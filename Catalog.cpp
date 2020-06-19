@@ -225,15 +225,16 @@ bool CatalogManager::ExistIndex(string indexname)
 	return flag;
 }
 
-int CatalogManager::GetColumnNumber(Table& table, string columnname)
+int CatalogManager::getAttr_no(Table& table, string attr_name)
 {
 	for (int i = 0;i < table.attributes.size();i++)
-		if (table.attributes[i].name == columnname)
+		if (table.attributes[i].name == attr_name)
 			return i;
+	cout << "No Attribute Named " << attr_name << endl;
 	return -1;
 }
 
-int CatalogManager::GetColumnAmount(Table& table)
+int CatalogManager::getAttr_size(Table& table)
 {
 	return table.attributes.size();
 }
