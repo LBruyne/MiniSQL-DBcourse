@@ -36,6 +36,10 @@ using namespace std;
 #define INT 1
 #define FLOAT 2
 #define CHAR 3
+#define INTLENGTH 11
+#define FLOATLENGTH 10
+#define INTLEN		11
+#define FLOATLEN	10
 
 typedef int Pointer;
 typedef int PageIndex;
