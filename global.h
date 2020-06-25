@@ -8,8 +8,8 @@
 
 #ifndef _MINISQL_GLOBAL_H_
 #define _MINISQL_GLOBAL_H_
-
-#include <unistd.h>
+#define  _CRT_SECURE_NO_WARNINGS
+//#include <unistd.h>
 #include <windows.h>
 #include <sys/types.h>
 #include <string>
@@ -104,15 +104,16 @@ struct RecordResult
 	bool status;
 	string Reason;
 };
+struct Row
+{
+	vector<string> DataField;
+};
 
 struct DATA
 {
 	vector<Row> ResultSet;
 };
 
-struct Row
-{
-	vector<string> DataField;
-};
+
 
 #endif
