@@ -95,6 +95,20 @@ public:
 	string value;
 };
 
+struct RecordResult
+{
+	bool status;
+	string Reason;
+};
 
+struct DATA
+{
+	vector<Row> ResultSet;
+};
+
+struct Row
+{
+	vector<string> DataField;
+};
 
 #endif
