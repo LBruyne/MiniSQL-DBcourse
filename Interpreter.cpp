@@ -1,5 +1,15 @@
-#include"Interpreter.h"
 #include"Catalog.h"
+#include"global.h"
+#include"IndexManager.h"
+#include"RecordManager.h"
+#include"Interpreter.h"
+#include"BufferManager.h"
+#include"Page.h"
+extern Interpreter i;
+extern RecordManager record;
+extern IndexManager index;
+extern CatalogManager catalog;
+extern BufferManager buf;
 
 void Interpreter::Query()
 {
@@ -69,10 +79,10 @@ void Interpreter::Create_Table()
 	i = 13;j = Next(i);length = j - i;
 	table_name = query.substr(i, length);
 	i = j+1;length = query.length() - i-1;
-	values = query.substr(i, length);			//¶ÁÈ¡½«À¨ºÅÄÚµÄ¶«Î÷»ãºÏ³ÉÒ»¸ö×Ö·û´®
+	values = query.substr(i, length);			//è¯»å–å°†æ‹¬å·å†…çš„ä¸œè¥¿æ±‡åˆæˆä¸€ä¸ªå­—ç¬¦ä¸²
 	//cout << values << endl;
 
-	for (int k = 0;k < values.length();k++)		//ÅĞ¶Ï¶ººÅ¸öÊı£¬ÒÔÅĞ¶ÏÊôĞÔÊıÁ¿
+	for (int k = 0;k < values.length();k++)		//åˆ¤æ–­é€—å·ä¸ªæ•°ï¼Œä»¥åˆ¤æ–­å±æ€§æ•°é‡
 	{
 		if (values[k] == ',')
 		{
@@ -81,7 +91,7 @@ void Interpreter::Create_Table()
 		}
 	}
 
-	value = values.substr(0, comma_index[0]);	//´ËÊ±valueÊÇµÚÒ»¸öÊôĞÔµÄĞÅÏ¢£¬ÀıÈç£º£¨sno char(8)
+	value = values.substr(0, comma_index[0]);	//æ­¤æ—¶valueæ˜¯ç¬¬ä¸€ä¸ªå±æ€§çš„ä¿¡æ¯ï¼Œä¾‹å¦‚ï¼šï¼ˆsno char(8)
 	Value.push_back(value);						
 	for (int k = 1;k < comma_num;k++)
 	{
@@ -89,16 +99,16 @@ void Interpreter::Create_Table()
 		Value.push_back(value);
 	}
 	value = values.substr(comma_index[comma_num - 1] + 1, values.length() - comma_index[comma_num - 1] - 1);
-	Value.push_back(value);						//´ËÊ±valueÊÇ×îºóÒ»¸ö×Ö¶ÎµÄĞÅÏ¢£¬ÀıÈçprimary key (sno)£©
+	Value.push_back(value);						//æ­¤æ—¶valueæ˜¯æœ€åä¸€ä¸ªå­—æ®µçš„ä¿¡æ¯ï¼Œä¾‹å¦‚primary key (sno)ï¼‰
 
-	if (Value[0][0] != '(' || Value[Value.size() - 1][Value[Value.size() - 1].length() - 1] != ')')//ÅĞ¶Ïcreate Óï¾äµÄ×óÓÒÀ¨ºÅ
+	if (Value[0][0] != '(' || Value[Value.size() - 1][Value[Value.size() - 1].length() - 1] != ')')//åˆ¤æ–­create è¯­å¥çš„å·¦å³æ‹¬å·
 	{
 		//throw Exception("Invalid Query of Create Table(())");
 		cout << "Invalid Query of Create Table(())" << endl;
 	}
 
 	Value[0] = Value[0].substr(1, Value[0].length() - 1);
-	Value[Value.size() - 1] = Value[Value.size() - 1].substr(0, Value[Value.size() - 1].length() - 1);	//ÕâÁ½¾äÓï¾äÔÚÈ¥µôÊ×Î²ÊôĞÔ×Ö·û´®ÖĞµÄ×óÓÒÀ¨ºÅ
+	Value[Value.size() - 1] = Value[Value.size() - 1].substr(0, Value[Value.size() - 1].length() - 1);	//è¿™ä¸¤å¥è¯­å¥åœ¨å»æ‰é¦–å°¾å±æ€§å­—ç¬¦ä¸²ä¸­çš„å·¦å³æ‹¬å·
 
 	for (int k = 0;k < Value.size();k++)
 	{
@@ -106,7 +116,7 @@ void Interpreter::Create_Table()
 		str = Value[k].substr(i, length);
 		temp.push_back(str);
 		//cout << i<< j<< length<<endl;
-		while (1)								//½«Ò»Õû¶Î×Ö¶Î·Ö½âÎª¼¸¸öµ¥´Ê£¬Èç£ºsname char(16) unique·Ö½âÎªsname¡¢char(16)¡¢uniqueÈı¸öµ¥´Ê
+		while (1)								//å°†ä¸€æ•´æ®µå­—æ®µåˆ†è§£ä¸ºå‡ ä¸ªå•è¯ï¼Œå¦‚ï¼šsname char(16) uniqueåˆ†è§£ä¸ºsnameã€char(16)ã€uniqueä¸‰ä¸ªå•è¯
 		{
 			if (j >= Value[k].length()) break;
 			i = j + 1;j = Next(i, Value[k]);length = j - i;
@@ -116,7 +126,7 @@ void Interpreter::Create_Table()
 			//cout << i << j << length << endl;
 		}
 		
-		if (temp[0] != "primary")				//²»ÊÇprimary keyĞÅÏ¢£¬¼´ÈÔÊÇÔÚ¹æ¶¨±íµÄÊôĞÔ
+		if (temp[0] != "primary")				//ä¸æ˜¯primary keyä¿¡æ¯ï¼Œå³ä»æ˜¯åœ¨è§„å®šè¡¨çš„å±æ€§
 		{
 			string char_length;
 			attr.name = temp[0];
@@ -144,7 +154,7 @@ void Interpreter::Create_Table()
 				break;
 			}
 
-			if (temp.size() == 3)			//Óï¾äÖĞÓĞÈı¸öµ¥´Ê£¬µÚÈı¸ö±Ø¶¨ÊÇunique£¬ÀıÈç£ºsname char(16) unique
+			if (temp.size() == 3)			//è¯­å¥ä¸­æœ‰ä¸‰ä¸ªå•è¯ï¼Œç¬¬ä¸‰ä¸ªå¿…å®šæ˜¯uniqueï¼Œä¾‹å¦‚ï¼šsname char(16) unique
 			{
 				if (temp[2] == "unique")
 					attr.isUnique = true;
@@ -154,11 +164,11 @@ void Interpreter::Create_Table()
 					//throw Exception("Invalid Query of Create Table(Invalid unique)");
 				}
 			}
-			if (temp.size() == 2)			//Á½¸öµ¥´Ê¾ÍÃ»ÓĞunique
+			if (temp.size() == 2)			//ä¸¤ä¸ªå•è¯å°±æ²¡æœ‰unique
 				attr.isUnique = false;
 			tab.attributes.push_back(attr);
 		}
-		if (temp[0] == "primary")			//µ½ÁËprimary keyĞÅÏ¢ÁË
+		if (temp[0] == "primary")			//åˆ°äº†primary keyä¿¡æ¯äº†
 		{
 			if (temp[1] != "key")
 			{
@@ -190,21 +200,20 @@ void Interpreter::Create_Table()
 
 	//for (int k = 0;k < tab.attributes.size();k++)
 	//	cout << tab.attributes[k].name <<" "<<tab.attributes[k].isUnique<< " " << tab.attributes[k].isPrimeryKey<<" " << tab.attributes[k].type<< endl;
-		
-	//ÔÙ½ÓÒ»¸öCatalog½Ó¿Ú
-	CatalogManager cat;
-	cat.createTable(tab);
+	//å†æ¥ä¸€ä¸ªCatalogæ¥å£
+
+	catalog.createTable(tab);
 }
 
 void Interpreter::Create_Index()	
 {
-	//create index ¸ñÊ½: ×óÓÒÀ¨ºÅ·Ö±ğ¶¼Òª¼Ó¿Õ¸ñ£¬Ïê¼û²Î¿¼ÎÄµµ//Àı×Ó£ºcreate index stunameidx on student ( sname );
+	//create index æ ¼å¼: å·¦å³æ‹¬å·åˆ†åˆ«éƒ½è¦åŠ ç©ºæ ¼ï¼Œè¯¦è§å‚è€ƒæ–‡æ¡£//ä¾‹å­ï¼šcreate index stunameidx on student ( sname );
 	cout << "Create_Index" << endl;
 
 	string index_name, table_name, attribute_name;
-	string temp[4];					//create index ºóÓĞËÄ¸öµ¥´Ê£¬Èç£ºcreate index stunameidx on student (sname)£¬ËÄ¸öµ¥´Ê·Ö±ğÊÇstunameidx¡¢on¡¢studentºÍ(sname)
+	string temp[4];					//create index åæœ‰å››ä¸ªå•è¯ï¼Œå¦‚ï¼šcreate index stunameidx on student (sname)ï¼Œå››ä¸ªå•è¯åˆ†åˆ«æ˜¯stunameidxã€onã€studentå’Œ(sname)
 	int i, j, length;
-	i = 13;							//index_nameµÄÆğÊ¼Î»ÖÃ
+	i = 13;							//index_nameçš„èµ·å§‹ä½ç½®
 	for (int k = 0;k <= 3;k++)
 	{
 		j = Next(i);
@@ -224,16 +233,16 @@ void Interpreter::Create_Index()
 
 	cout << index_name << table_name << attribute_name << endl;
 
-	//ÔÙ¼ÓÒ»¸öCatalog½Ó¿ÚorÆäËû½Ó¿Ú
+	//å†åŠ ä¸€ä¸ªCatalogæ¥å£orå…¶ä»–æ¥å£
 	Index id;Table tab;
 	id.attribute_name = attribute_name;
 	id.index_name = index_name;
 	id.table_name = table_name;
-	CatalogManager cat;
-	tab = cat.getTable_info(table_name);
-	id.column = cat.getAttr_no(tab, attribute_name);
+	//CatalogManager cat;
+	tab = catalog.getTable_info(table_name);
+	id.column = catalog.getAttr_no(tab, attribute_name);
 	id.columnLength = tab.attributes[id.column].length;
-	cat.createIndex(id);
+	catalog.createIndex(id);
 }
 
 void Interpreter::Drop_Table()
@@ -253,9 +262,8 @@ void Interpreter::Drop_Table()
 	else
 	{
 		table_name = query.substr(i, length);
-		//ÔÙ¼ÓÒ»¸öCatalog½Ó¿ÚorÆäËû½Ó¿Ú
-		CatalogManager cat;
-		cat.dropTable(table_name);
+		//å†åŠ ä¸€ä¸ªCatalogæ¥å£orå…¶ä»–æ¥å£
+		catalog.dropTable(table_name);
 	}
 }
 
@@ -278,9 +286,8 @@ void Interpreter::Drop_Index()
 		index_name = query.substr(i, length);
 		//cout<<index_name<<endl;
 	}
-	//ÔÙ¼ÓÒ»¸öCatalog½Ó¿ÚorÆäËû½Ó¿Ú
-	CatalogManager cat;
-	cat.dropIndex(index_name);
+	//å†åŠ ä¸€ä¸ªCatalogæ¥å£orå…¶ä»–æ¥å£
+	catalog.dropIndex(index_name);
 }
 
 void Interpreter::Select()
@@ -316,7 +323,9 @@ void Interpreter::Select()
 	if (temp.size() == 0)
 	{
 		cout << "The whole table" << endl;
-		//Õû¸ö±íÕ¹Ê¾µÄ½Ó¿Ú£¬table_nameĞÅÏ¢ÒÑ¾­ÓĞÁË
+		//æ•´ä¸ªè¡¨å±•ç¤ºçš„æ¥å£ï¼Œtable_nameä¿¡æ¯å·²ç»æœ‰äº†
+		vector<Condition> cons;
+		record.select(tab, cons,'a');
 	}
 	else
 	{
@@ -325,11 +334,11 @@ void Interpreter::Select()
 			cout << "Invalid Query of Select(where)!";
 			//throw exception("Invalid Query of Select(where)!");
 		}
-		for (int k = 0;k < temp.size();k++)			//¿´¿´Ìõ¼şÓï¾äÖĞÓĞ¶àÉÙ¸öand
+		for (int k = 0;k < temp.size();k++)			//çœ‹çœ‹æ¡ä»¶è¯­å¥ä¸­æœ‰å¤šå°‘ä¸ªand
 			if (temp[k] == "and")
 				and_index.push_back(k);
 
-		for (int k = 0;k <= and_index.size();k++)	//Ñ­»·ÕÒµ½Ã¿Ò»ÌõÓÃand·Ö¸î¿ªµÄÌõ¼şÓï¾ä
+		for (int k = 0;k <= and_index.size();k++)	//å¾ªç¯æ‰¾åˆ°æ¯ä¸€æ¡ç”¨andåˆ†å‰²å¼€çš„æ¡ä»¶è¯­å¥
 		{
 			attribute_name = temp[1 + 4 * k];
 			int attr_no;
@@ -362,19 +371,25 @@ void Interpreter::Select()
 				con.value = temp[3 + 4 * k];
 
 			cons.push_back(con);
-			//ÔÙ¼ÓÒ»¸ö½Ó¿Ú
-			//Ìõ¼şÈ«²¿±£´æÔÚconsÀï
-
+			/// <é—®é¢˜æ¥äº†ï¼Œè®°å¾—åˆ¤å®šæ˜¯orè¿˜æ˜¯andè¿æ¥ï¼
+			/// æ­¤å¤„å…ˆå‡è®¾æ˜¯and
+			/// è®°å¾—æ”¹å›å» 
+			DATA resultSelect = record.select(tab, cons, 'a');
+			for (auto each : resultSelect.ResultSet)
+				for (auto each1 : each.DataField)
+					cout << each1;
+			//å†åŠ ä¸€ä¸ªæ¥å£
+			//æ¡ä»¶å…¨éƒ¨ä¿å­˜åœ¨consé‡Œ
 		}
 
-		//for (int k = 0;k < cons.size();k++)//ÑéÖ¤consÄÚÈİÊÇ·ñÕıÈ·
+		//for (int k = 0;k < cons.size();k++)//éªŒè¯conså†…å®¹æ˜¯å¦æ­£ç¡®
 		//	cout << cons[k].columnNum << endl << cons[k].op << endl << cons[k].value << endl;
 	}
 }
 
 void Interpreter::Insert()
 {
-	//Insert ¸ñÊ½£ºinsert into student values ('12345678','y',22,'M'); valuesÓëÀ¨ºÅÓĞ¿Õ¸ñ£¬À¨ºÅÄÚÈİ²»µÃÓĞ¿Õ¸ñ
+	//Insert æ ¼å¼ï¼šinsert into student values ('12345678','y',22,'M'); valuesä¸æ‹¬å·æœ‰ç©ºæ ¼ï¼Œæ‹¬å·å†…å®¹ä¸å¾—æœ‰ç©ºæ ¼
 	cout << "Insert" << endl;
 
 	string table_name;
@@ -453,8 +468,11 @@ void Interpreter::Insert()
 		//	cout << Value[k] << endl;
 	}
 	
-	//ÔÙ¼ÓÒ»¸öËû½Ó¿Ú
-	//ÄÚÈİÈ«²¿±£´æÔÚValueÀïÃæ£¬ÊÇÒ»¸ö×Ö·û´®µÄÈİÆ÷£¬ËùÓĞÀàĞÍ¶¼ÊÇÒÔ×Ö·û´®ĞÎÊ½´æ´¢ÆğÀ´
+	//map->string
+
+	record.insert(tab, Value);
+	//å†åŠ ä¸€ä¸ªä»–æ¥å£
+	//å†…å®¹å…¨éƒ¨ä¿å­˜åœ¨Valueé‡Œé¢ï¼Œæ˜¯ä¸€ä¸ªå­—ç¬¦ä¸²çš„å®¹å™¨ï¼Œæ‰€æœ‰ç±»å‹éƒ½æ˜¯ä»¥å­—ç¬¦ä¸²å½¢å¼å­˜å‚¨èµ·æ¥
 }
 
 void Interpreter::Delete()
@@ -467,13 +485,13 @@ void Interpreter::Delete()
 	j = Next(i);
 	length = j - i;
 	table_name = query.substr(i, length);
-	if (query[j] == ';')			//ÀıÈç£ºdelete from student;
+	if (query[j] == ';')			//ä¾‹å¦‚ï¼šdelete from student;
 	{
-		//É¾³ı±íµÄ½Ó¿Ú
+		//åˆ é™¤è¡¨çš„æ¥å£
 		CatalogManager cat;
 		cat.dropTable(table_name);
 	}
-	else                            //ÀıÈç£ºdelete from student where sno = '88888888';
+	else                            //ä¾‹å¦‚ï¼šdelete from student where sno = '88888888';
 	{
 		string temp[4];
 		for (int k = 0;k <= 3;k++)
@@ -512,7 +530,7 @@ void Interpreter::Delete()
 			con.op = Ge;
 		else if (temp[2] == "=")
 			con.op = Eq;
-		else if (temp[2] == "<>")
+		else if (temp[2] == "<>"||temp[2]=="!=")
 			con.op = Ne;
 
 		if ((temp[3].substr(0, 1) == "'"&&temp[3][temp[3].length() - 1] != '\'') || (temp[3].substr(0, 1) != "'"&&temp[3][temp[3].length() - 1] == '\''))
@@ -528,9 +546,14 @@ void Interpreter::Delete()
 
 		//cout << con.op << con.value << endl;
 
-		//ÔÙ¼ÓÒ»¸öÉ¾³ıÄ³Ğ©ÖµµÄ½Ó¿Ú
-		//table_name,attribute_name,Condition con¶¼ÒÑ¾­´¢´æÍê±Ï£¬conÀïµÄvalueÒ²ÊÇÒÔ×Ö·û´®ĞÎÊ½´æ´¢µÄ
-		//ÀıÈçdelete from student where sno = '88888888'; ÖĞ conµÄvalueÊÇ 88888888 ÒÑ¾­°Ñµ¥ÒıºÅÈ«²¿È¥µôÁË
+		//å†åŠ ä¸€ä¸ªåˆ é™¤æŸäº›å€¼çš„æ¥å£
+		//table_name,attribute_name,Condition conéƒ½å·²ç»å‚¨å­˜å®Œæ¯•ï¼Œconé‡Œçš„valueä¹Ÿæ˜¯ä»¥å­—ç¬¦ä¸²å½¢å¼å­˜å‚¨çš„
+		//ä¾‹å¦‚delete from student where sno = '88888888'; ä¸­ conçš„valueæ˜¯ 88888888 å·²ç»æŠŠå•å¼•å·å…¨éƒ¨å»æ‰äº†
+
+		//å…ˆæš‚æ—¶åªç»™ä¸€ä¸ªcondition
+		vector <Condition> cons;
+		cons.push_back(con);
+		record.deleteR(tab, cons, 'a');
 	}
 }
 
