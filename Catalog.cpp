@@ -5,23 +5,23 @@ void CatalogManager::readTable() {
 	fstream  fin(filename.c_str(), ios::in);
 	fin >> tableNum;
 	for (int i = 0; i < tableNum; i++)
-	{//fill in the vector of Tables
-		Table temp_table;
-		fin >> temp_table.name;
-		fin >> temp_table.attriNum;
-		fin >> temp_table.blockNum;
-		for (int j = 0; j < temp_table.attriNum; j++)
-		{//fill in the vector of temp_table.attributes
-			Attribute temp_attri;
-			fin >> temp_attri.name;
-			fin >> temp_attri.type;
-			fin >> temp_attri.length;
-			fin >> temp_attri.isPrimeryKey;
-			fin >> temp_attri.isUnique;
-			temp_table.attributes.push_back(temp_attri);
-			temp_table.totalLength += temp_attri.length;
+	{
+		Table tab;
+		fin >> tab.name;
+		fin >> tab.attriNum;
+		fin >> tab.blockNum;
+		for (int j = 0; j < tab.attriNum; j++)
+		{
+			Attribute attr;
+			fin >> attr.name;
+			fin >> attr.type;
+			fin >> attr.length;
+			fin >> attr.isPrimeryKey;
+			fin >> attr.isUnique;
+			tab.attributes.push_back(attr);
+			tab.totalLength += attr.length;
 		}
-		Tables.push_back(temp_table);
+		Tables.push_back(tab);
 	}
 	fin.close();
 }
@@ -31,19 +31,20 @@ void CatalogManager::readIndex() {
 	fstream  fin(filename.c_str(), ios::in);
 	fin >> indexNum;
 	for (int i = 0; i < indexNum; i++)
-	{//fill in the vector of Indexes
-		Index temp_index;
-		fin >> temp_index.index_name;
-		fin >> temp_index.table_name;
-		fin >> temp_index.column;
-		fin >> temp_index.columnLength;
-		fin >> temp_index.blockNum;
-		Indexes.push_back(temp_index);
+	{
+		Index index;
+		fin >> index.index_name;
+		fin >> index.table_name;
+		fin >> index.column;
+		fin >> index.columnLength;
+		fin >> index.blockNum;
+		Indexes.push_back(index);
 	}
 	fin.close();
 }
 
-void CatalogManager::writeTable() {
+void CatalogManager::writeTable() 
+{
 	string filename = "table.catlog";
 	fstream  fout(filename.c_str(), ios::out);
 
@@ -66,9 +67,11 @@ void CatalogManager::writeTable() {
 	fout.close();
 }
 
-void CatalogManager::writeIndex() {
+void CatalogManager::writeIndex() 
+{
 	string filename = "index.catlog";
 	fstream  fout(filename.c_str(), ios::out);
+
 	fout << indexNum << endl;
 	for (int i = 0; i < indexNum; i++)
 	{
@@ -195,7 +198,7 @@ Index CatalogManager::getIndex_info(string index_name)
 	{
 		cout << "No Index Named " << index_name << endl;
 		Index tmpt;
-		return tmpt;//indicate that table information not found
+		return tmpt;		//没找到
 	}
 }
 
@@ -239,8 +242,11 @@ int CatalogManager::getAttr_size(Table& table)
 	return table.attributes.size();
 }
 
-void CatalogManager::ShowTableCatalog() {//this method is for debug only
-	cout << "##    Number of Tables:" << tableNum << endl;
+//debug专用
+void CatalogManager::ShowTableCatalog() 
+{
+	cout << "DEBUG:" << endl;
+	cout << "Number of Tables:" << tableNum << endl;
 	for (int i = 0; i < tableNum; i++)
 	{
 		cout << "TABLE " << i << endl;
@@ -265,8 +271,10 @@ void CatalogManager::ShowTableCatalog() {//this method is for debug only
 	}
 }
 
-void CatalogManager::ShowIndexCatalog() {//this method is for debug also
-	cout << "##    Number of Indexes:" << indexNum << endl;
+void CatalogManager::ShowIndexCatalog() 
+{
+	cout << "DEBUG:" << endl;
+	cout << "Number of Indexes:" << indexNum << endl;
 	for (int i = 0; i < indexNum; i++)
 	{
 		cout << "INDEX " << i << endl;
