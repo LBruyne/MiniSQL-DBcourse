@@ -430,7 +430,7 @@ Pointer BPlusTree<T>::FindPointer(const T& data) {
 }
 
 template<class T>
-int BPlusTree<T>::FindLess(T& data, bool CanEqual, vector<Pointer>& pointers) {
+int BPlusTree<T>::FindLess(const T& data, bool CanEqual, vector<Pointer>& pointers) {
 	Node<T>* node = root;
 	while (node != nullptr && node->children[0])
 	{
@@ -479,7 +479,7 @@ int BPlusTree<T>::FindLess(T& data, bool CanEqual, vector<Pointer>& pointers) {
 }
 
 template<class T>
-int BPlusTree<T>::FindLarger(T& data, bool CanEqual, vector<Pointer>& pointers) {
+int BPlusTree<T>::FindLarger(const T& data, bool CanEqual, vector<Pointer>& pointers) {
 	Node<T>* node = root;
 	while (node != nullptr && node->children[0])
 	{
@@ -528,7 +528,7 @@ int BPlusTree<T>::FindLarger(T& data, bool CanEqual, vector<Pointer>& pointers) 
 
 
 template<class T>
-int BPlusTree<T>::FindNonEqual(T& data, std::vector<Pointer>& pointers) {
+int BPlusTree<T>::FindNonEqual(const T& data, std::vector<Pointer>& pointers) {
 	int count = 0;
 	pointers.clear();
 	Node<T>* node = root;
@@ -549,7 +549,7 @@ int BPlusTree<T>::FindNonEqual(T& data, std::vector<Pointer>& pointers) {
 }
 
 template<class T>
-int BPlusTree<T>::FindBetween(T& data1, bool CanEqual1, T& data2, bool CanEqual2, std::vector<Pointer>& pointers) {
+int BPlusTree<T>::FindBetween(const T& data1, bool CanEqual1, T& data2, bool CanEqual2, std::vector<Pointer>& pointers) {
 	Node<T>* node = root;
 	while (node != nullptr && node->children[0]) {
 		int i;
