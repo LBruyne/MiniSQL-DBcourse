@@ -5,11 +5,11 @@
 class Interpreter
 {
 private:
-	std::string query;		//²éÑ¯Óï¾ä
+	std::string query;		//æŸ¥è¯¢è¯­å¥
 public:
-	bool flag = true;			//ÅĞ¶ÏÊÇ·ñquit
-	void Query();				//ÓÃÓÚ¶ÁÈ¡Ö¸Áî
-	void Choice();				//¸ù¾İ¶ÁÈëµÄÖ¸Áî¶ÔÓ¦ÏàÓ¦½Ó¿Ú
+	bool flag = true;			//åˆ¤æ–­æ˜¯å¦quit
+	void Query();				//ç”¨äºè¯»å–æŒ‡ä»¤
+	void Choice();				//æ ¹æ®è¯»å…¥çš„æŒ‡ä»¤å¯¹åº”ç›¸åº”æ¥å£
 	void Create_Table();		
 	void Create_Index();
 	void Drop_Table();
@@ -20,11 +20,11 @@ public:
 	void Quit();
 	void Execfile();
 
-	int Next(int i);			//·µ»ØÏÂÒ»¸öµ¥´ÊµÄÄ©Î²Î»ÖÃ
-	int Next(int i, string str);//·µ»Østr×Ö·û´®ÀïÃæÏÂÒ»¸öµ¥´ÊµÄÄ©Î²Î»ÖÃ		//ÕâÁ½¸ö¶¼ÊÇÒÔ¿Õ¸ñºÍ;»ò'\t'×÷ÎªÅĞ¶Ï±êÖ¾µÄ
+	int Next(int i);			//è¿”å›ä¸‹ä¸€ä¸ªå•è¯çš„æœ«å°¾ä½ç½®
+	int Next(int i, string str);//è¿”å›strå­—ç¬¦ä¸²é‡Œé¢ä¸‹ä¸€ä¸ªå•è¯çš„æœ«å°¾ä½ç½®		//è¿™ä¸¤ä¸ªéƒ½æ˜¯ä»¥ç©ºæ ¼å’Œ;æˆ–'\t'ä½œä¸ºåˆ¤æ–­æ ‡å¿—çš„
 };
 
-class Exception :std::exception //Òì³£Å×³ö
+class Exception :std::exception //å¼‚å¸¸æŠ›å‡º
 {
 private:
 	std::string error;
