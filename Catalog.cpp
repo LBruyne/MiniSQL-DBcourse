@@ -93,6 +93,7 @@ void CatalogManager::createTable(Table& table)
 		tableNum++;
 		for (int i = 0; i < table.attributes.size(); i++) 
 			table.totalLength += table.attributes[i].length;
+		table.totalLength += 1;//最后一位是有效位
 		Tables.push_back(table);
 	}
 }

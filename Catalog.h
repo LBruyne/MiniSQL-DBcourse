@@ -6,16 +6,16 @@ class CatalogManager
 private:
 
 	int tableNum;
-	vector<Table> Tables;		//用于存储table信息
+	vector<Table> Tables;		//鐢ㄤ簬瀛樺偍table淇℃伅
 
 	int indexNum;
-	vector<Index> Indexes;		//用于存储index信息	
+	vector<Index> Indexes;		//鐢ㄤ簬瀛樺偍index淇℃伅	
 	                	
-	void readTable();			//从文件中读取
+	void readTable();			//浠庢枃浠朵腑璇诲彇
 
 	void readIndex();
 
-	void writeTable();			//写回文件
+	void writeTable();			//鍐欏洖鏂囦欢
 
 	void writeIndex();
 
