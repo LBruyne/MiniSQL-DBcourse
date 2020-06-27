@@ -22,6 +22,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 using namespace std;
 
 // pageSize is an integral multiple of KB, define as 4KB.
@@ -44,7 +45,7 @@ using namespace std;
 typedef int Pointer;
 typedef int PageIndex;
 typedef int FileHandle;
-
+typedef int BlockOffset;
 enum Comparison { Lt, Le, Gt, Ge, Eq, Ne };
 enum PageType {
     Undefined,
@@ -103,6 +104,7 @@ struct RecordResult
 {
 	bool status;
 	string Reason;
+	RecordResult() :status(1) {}
 };
 struct Row
 {

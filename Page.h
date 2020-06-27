@@ -18,12 +18,14 @@ public:
     string tableName;
     PageType pageType;
     PageIndex pageIndex;
+    BlockOffset ofs;
     char pageData[PAGE_SIZE];
 
     Page() {
         tableName = "";
         pageType = PageType::Undefined;
         pageIndex = -1;
+        ofs = 0;
         memset(pageData, '@', PAGE_SIZE);
     }
 
@@ -32,7 +34,7 @@ public:
 
     // compare two page.
     bool operator==(const Page& page) {
-        return (this->tableName == page.tableName) && (this->pageType == page.pageType) && (this->pageIndex == page.pageIndex);
+        return (this->tableName == page.tableName) && (this->pageType == page.pageType) && (this->pageIndex == page.pageIndex)&&(this->ofs==page.ofs);
     }
 };
 
