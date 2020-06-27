@@ -38,6 +38,13 @@ private:
 	void ScanTable(Table&, RecordResult&, vector<Condition>&, bool negative = 0);
 	bool comp(Table&,Condition&, Condition&);
 	void MySort(Table&, vector<Condition> &);
+	void splitRow(const string&, Row&, Table&);
+	void testifyOneRow(Row&, vector<Condition>&, bool&, DATA&);
+	bool testifyOneRow(Row&, vector<Condition>&, bool&);
+	void deleteIndex(Table&, Row&);
+	void insertIndex(Table&, Row&,const Pointer&);
+	void checkDuplicate(Table&, vector<string>&, RecordResult&);
+
 };
 
 
