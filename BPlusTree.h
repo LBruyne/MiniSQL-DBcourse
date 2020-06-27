@@ -58,10 +58,10 @@ public:
     BPlusTree(std::string &_TableName, std::string &_AttribName, int _MaxChildrens);
     bool Find(const T &data, Pointer &pointer);
     Pointer FindPointer(const T& data);
-    int  FindLess(T &data, bool CanEqual, vector<Pointer> &pointers);
-    int  FindLarger(T &data, bool CanEqual, vector<Pointer> &pointers);
-    int  FindNonEqual(T &data, vector<Pointer> &pointers);
-    int  FindBetween(T &data1, bool CanEqual1, T &data2, bool CanEqual2, std::vector<Pointer> &pointers);
+    int  FindLess(const T &data, bool CanEqual, vector<Pointer> &pointers);
+    int  FindLarger(const T & data, bool CanEqual, vector<Pointer> &pointers);
+    int  FindNonEqual(const T &data, vector<Pointer> &pointers);
+    int  FindBetween(const T &data1, bool CanEqual1, T &data2, bool CanEqual2, std::vector<Pointer> &pointers);
     int  CalNodeNum(Node<T> *node);
     string GetSaveFileName();
     void Insert(const T &data, const Pointer &pointer);
