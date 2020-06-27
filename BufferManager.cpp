@@ -6,7 +6,7 @@
  * Implementation for BufferManagement.
 **/
 #include "BufferManager.h"
-
+#include "global.h"
 bool BufferManager::readPage( Page& page )
 {
 	assert(page.pageIndex == PageType::Undefined);
@@ -118,13 +118,13 @@ void BufferManager::lruCounterAddExceptCurrent( int index )
     lruCounter[index] = 0;
 }
 
-
 bool BufferManager::forceReadPageFromFile( Page& page )
 {
     string filename = (page.tableName + "." + "record");
     FILE* fp = fopen(filename.c_str(), "rb");
     if (fp) {
-	    fread( page.pageData, PAGE_SIZE, 1, fp);
+        fseek(fp, PAGE_SIZE * page.ofs, SEEK_SET);
+	    fread( page.pageData, PAGE_SIZE, SEEK_CUR, fp);
 	    fclose(fp);
         return true;
     }
@@ -136,7 +136,8 @@ bool BufferManager::forceWritePageToFile( Page& page )
     string filename = (page.tableName + "." + "record");
     FILE* fp = fopen(filename.c_str(), "rb+");
 	if (fp) {
-		fwrite( page.pageData, PAGE_SIZE, 1, fp);
+        fseek(fp, PAGE_SIZE * page.ofs, SEEK_SET);
+		fwrite( page.pageData, PAGE_SIZE, SEEK_CUR, fp);
 		fclose(fp);
         return true;
 	}
