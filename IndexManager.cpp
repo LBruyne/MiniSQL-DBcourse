@@ -796,6 +796,7 @@ BPlusTree<T>::BPlusTree(std::string& _TableName, std::string& _AttribName, int _
 	root = nullptr;
 }
 
+
 template<class T>
 void BPlusTree<T>::setAttribute(string& table, string& attribute) {
 	this->TableName = table;
@@ -850,7 +851,7 @@ bool IndexManager::CreateIndex(Table& table)
 {
 	int i;
 	for (i = 0; i < table.attriNum; i++)
-		if (table.attributes[i].isPrimeryKey == true)
+		if (table.attributes[i].isPrimaryKey == true)
 			break;
 	if (i == table.attriNum) return false;
 	std::string FileName = table.name + std::string("_") + table.attributes[i].name + std::string(".index");
@@ -1243,6 +1244,13 @@ bool IndexManager::Find(std::string& value, int type)
 	return 0;
 }
 
+/*
+void IndexManager::printS() {
+	if (bpt_STRING)
+		bpt_STRING->PrintAll();
+}
+
+*/
 IndexManager::~IndexManager()
 {
 	ResetBptInt(true);

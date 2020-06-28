@@ -43,6 +43,7 @@ public:
 	bool SelectItem(Condition &cond, int type, std::vector<Pointer> &pointers);
 	Pointer FindPointer(std::string& value, int type);
 	bool Find(std::string& value, int type);
+	//void printS();//test
 	~IndexManager();
 };
 
