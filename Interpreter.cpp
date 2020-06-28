@@ -145,7 +145,7 @@ void Interpreter::Create_Table()
 				{
 					char_length = temp[1].substr(5, temp[1].length() - 6);
 					//cout << char_length<<endl;
-					attr.length = atoi(char_length.c_str()) + 1;
+					attr.length = atoi(char_length.c_str()) ;
 				}
 				break;
 			default:
