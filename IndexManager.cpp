@@ -796,6 +796,12 @@ BPlusTree<T>::BPlusTree(std::string& _TableName, std::string& _AttribName, int _
 	root = nullptr;
 }
 
+template<class T>
+void BPlusTree<T>::setAttribute(string& table, string& attribute) {
+	this->TableName = table;
+	this->AttribName = attribute;
+}
+
 //////////////////////////////////////////////////////
 // INDEX MANAGER 
 //////////////////////////////////////////////////////
@@ -875,6 +881,7 @@ bool IndexManager::CreateIndex(Table& table)
 	}
 	return false;
 }
+
 bool IndexManager::HasIndex(std::string& TableName, std::string& AttribName)
 {
 	std::string FileName = TableName + std::string("_") + AttribName + std::string(".index");
@@ -960,25 +967,28 @@ bool IndexManager::LoadIndex(std::string& TableName, std::string& AttribName, in
 		ResetBptInt(true);
 		bpt_INT = new BPlusTree<int>(FileName);
 		bptIntName = FileName;
+		bpt_INT->setAttribute(TableName, AttribName);
 		return true;
 		break;
 	case FLOAT:
 		ResetBptFloat(true);
 		bpt_FLOAT = new BPlusTree<float>(FileName);
 		bptFloatName = FileName;
+		bpt_FLOAT->setAttribute(TableName, AttribName);
 		return true;
 		break;
 	case CHAR:
 		ResetBptString(true);
 		bpt_STRING = new BPlusTree<std::string>(FileName);
 		bptStringName = FileName;
+		bpt_STRING->setAttribute(TableName, AttribName);
 		return true;
 		break;
 	}
 	return false;
 }
 
-bool IndexManager::InsertItem(std::string& value, Pointer pointer, int type)
+bool IndexManager::InsertItem(const std::string& value, Pointer pointer, int type)
 {
 	switch (type)
 	{
