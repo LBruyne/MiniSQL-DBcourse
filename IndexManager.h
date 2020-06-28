@@ -37,7 +37,7 @@ public:
 	void ResetBptString(bool save);
 	void SaveIndex();
 	bool LoadIndex(std::string &TableName, std::string &AttribName, int type);
-	bool InsertItem(std::string &value, Pointer pointer, int type);
+	bool InsertItem(const std::string &value, Pointer pointer, int type);
 	bool DeleteItem(std::string &value, int type) ;
 	bool DeletePointers(std::vector<Pointer> &pointers, int type);
 	bool SelectItem(Condition &cond, int type, std::vector<Pointer> &pointers);
