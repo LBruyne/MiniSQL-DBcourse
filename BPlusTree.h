@@ -76,6 +76,7 @@ public:
     int PrintAll();
     int PrintAllreverse();
     int PrintAll(std::ofstream &fout);
+    void setAttribute(string&, string&);
 };
 
 #endif

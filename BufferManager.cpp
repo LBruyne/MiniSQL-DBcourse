@@ -9,7 +9,7 @@
 #include "global.h"
 bool BufferManager::readPage( Page& page )
 {
-	assert(page.pageIndex == PageType::Undefined);
+	//assert(page.pageIndex == PageType::Undefined);
     int pageIndex = findPageInCache(page);
     if( pageIndex != PAGE_NOTFOUND ) {
         // read directly from cache.
@@ -156,6 +156,4 @@ PageIndex BufferManager::getUnpinedBiggestPageFromCache()
     }
     return retIndex;
 }
-
-
 
