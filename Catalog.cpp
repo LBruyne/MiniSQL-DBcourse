@@ -17,7 +17,7 @@ void CatalogManager::readTable() {
 			fin >> attr.name;
 			fin >> attr.type;
 			fin >> attr.length;
-			fin >> attr.isPrimeryKey;
+			fin >> attr.isPrimaryKey;
 			fin >> attr.isUnique;
 			tab.attributes.push_back(attr);
 			tab.totalLength += attr.length;
@@ -63,7 +63,7 @@ void CatalogManager::writeTable()
 			fout << Tables[i].attributes[j].type << " ";
 			fout << Tables[i].attributes[j].length << " ";
 			fout << Tables[i].attributes[j].isUnique << " ";
-			fout << Tables[i].attributes[j].isPrimeryKey << endl;
+			fout << Tables[i].attributes[j].isPrimaryKey << endl;
 		}
 	}
 	fout.close();
@@ -274,7 +274,7 @@ void CatalogManager::ShowTableCatalog()
 			}
 			if (Tables[i].attributes[j].isUnique)	cout << "Unique\t";
 			else cout << "NotUnique ";
-			if (Tables[i].attributes[j].isPrimeryKey) cout << "PrimeryKey\t" << endl;
+			if (Tables[i].attributes[j].isPrimaryKey) cout << "PrimeryKey\t" << endl;
 			else cout << endl;
 		}
 	}
@@ -292,4 +292,10 @@ void CatalogManager::ShowIndexCatalog()
 		cout << "Column Number: " << Indexes[i].column << endl;
 		cout << "Column Number of blocks occupied in disk: " << Indexes[i].blockNum << endl;
 	}
+}
+
+void CatalogManager::changeTable(Table& T) {
+	for (int i = 0; i < tableNum; i++)
+		if ((Tables[i].name) == T.name)
+			Tables[i].blockNum = T.blockNum;	
 }
