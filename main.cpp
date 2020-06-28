@@ -8,10 +8,10 @@
 
 using namespace std;
 
-int BufferManager::lruCounter[CACHE_CAPACITY];
-Page BufferManager::cachePages[CACHE_CAPACITY];
-bool BufferManager::pined[CACHE_CAPACITY];
-bool BufferManager::isDirty[CACHE_CAPACITY];
+int BufferManager::		lruCounter[CACHE_CAPACITY];
+Page BufferManager::	cachePages[CACHE_CAPACITY];
+bool BufferManager::	pined[CACHE_CAPACITY];
+bool BufferManager::	isDirty[CACHE_CAPACITY];
 //需要在全局范围内重新定义一次
 
 Interpreter i;
