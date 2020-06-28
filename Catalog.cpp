@@ -1,5 +1,6 @@
 #include"Catalog.h"
-
+#include "IndexManager.h"
+extern IndexManager index;
 void CatalogManager::readTable() {
 	const string filename = "table.catlog";
 	fstream  fin(filename.c_str(), ios::in);
@@ -21,6 +22,7 @@ void CatalogManager::readTable() {
 			tab.attributes.push_back(attr);
 			tab.totalLength += attr.length;
 		}
+		tab.totalLength++;
 		Tables.push_back(tab);
 	}
 	fin.close();
@@ -99,6 +101,12 @@ void CatalogManager::createTable(Table& table)
 		table.totalLength += 1;//最后一位是有效位
 		Tables.push_back(table);
 	}
+	index.CreateIndex(table);
+	FILE* newfile;
+	string filename = table.name + ".record";
+	newfile=fopen(filename.c_str(),"wb");
+	//fwrite("", PAGE_SIZE, 1, newfile);
+	fclose(newfile);
 }
 
 void CatalogManager::createIndex(Index index)
