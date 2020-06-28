@@ -34,6 +34,8 @@ public:
 
 	void createTable(Table& table);
 
+	void changeTable(Table& table);
+
 	void createIndex(Index index);
 
 	void dropTable(Table table);
