@@ -10,7 +10,7 @@ extern RecordManager record;
 extern IndexManager index;
 extern CatalogManager catalog;
 extern BufferManager buf;
-
+using namespace std;
 void Interpreter::Query()
 {
 	string s;
@@ -182,7 +182,7 @@ void Interpreter::Create_Table()
 				{
 					if (tab.attributes[k].name == a_name);
 					{
-						tab.attributes[k].isPrimeryKey = true;
+						tab.attributes[k].isPrimaryKey = true;
 						break;
 					}
 				}
@@ -199,7 +199,7 @@ void Interpreter::Create_Table()
 
 
 	//for (int k = 0;k < tab.attributes.size();k++)
-	//	cout << tab.attributes[k].name <<" "<<tab.attributes[k].isUnique<< " " << tab.attributes[k].isPrimeryKey<<" " << tab.attributes[k].type<< endl;
+	//	cout << tab.attributes[k].name <<" "<<tab.attributes[k].isUnique<< " " << tab.attributes[k].isPrimaryKey<<" " << tab.attributes[k].type<< endl;
 	//再接一个Catalog接口
 
 	catalog.createTable(tab);
@@ -307,12 +307,14 @@ void Interpreter::Select()
 	vector<Condition>cons;
 	Condition con;
 	Table tab;
-
+	table_name = query.substr(query.find("from")+4);
+	table_name = table_name.substr(table_name.find_first_not_of(" \t"));
+	table_name = table_name.substr(0, table_name.find_first_of(", \t"));
 	int i, j, length;
 	i = 14;
 	j = Next(i);
 	length = j - i;
-	table_name = query.substr(i, length);
+	//table_name = query.substr(i, length);
 	while(1)
 	{
 		if (j == query.length() - 1) break;
@@ -323,9 +325,22 @@ void Interpreter::Select()
 	if (temp.size() == 0)
 	{
 		cout << "The whole table" << endl;
+		table_name = table_name.substr(0, table_name.find_last_not_of(" \t,"));
 		//整个表展示的接口，table_name信息已经有了
 		vector<Condition> cons;
-		record.select(tab, cons,'a');
+		Table T = catalog.getTable_info(table_name);
+		DATA res=record.select(T, cons,'a');
+		cout << endl;
+		for (size_t i = 0; i < res.ResultSet.size(); i++)
+		{
+			for (size_t j = 0; j < res.ResultSet[i].DataField[j].size(); j++)
+			{
+				cout << res.ResultSet[i].DataField[j] << "    ";
+			}
+			cout << endl;
+		}
+		if (!res.ResultSet.size())
+			cout << "No matching records." << endl;
 	}
 	else
 	{
@@ -334,6 +349,7 @@ void Interpreter::Select()
 			cout << "Invalid Query of Select(where)!";
 			//throw exception("Invalid Query of Select(where)!");
 		}
+		/*
 		for (int k = 0;k < temp.size();k++)			//看看条件语句中有多少个and
 			if (temp[k] == "and")
 				and_index.push_back(k);
@@ -371,13 +387,95 @@ void Interpreter::Select()
 				con.value = temp[3 + 4 * k];
 
 			cons.push_back(con);
+		*/
+		table_name = table_name.substr(0, table_name.find_last_not_of(" \t,")+1);
+		Table T = catalog.getTable_info(table_name);
+		vector <Condition> cons;
+		size_t conditionStart = query.find("where") + 5;
+		size_t subStart = conditionStart;
+		string getAttri = query;
+		vector<string> showAttri;
+		string oper;
+		//拿到需要展示的所有属性
+		getAttri = getAttri.substr(getAttri.find("select") + 6);
+		getAttri = getAttri.substr(0, getAttri.find("from"));
+		if (getAttri.find("*") != string::npos) {
+			for (auto iter : T.attributes) {
+				showAttri.push_back(iter.name);
+			}
+		}
+		else
+		{
+			while (getAttri.find(",") != string::npos) {
+				getAttri = getAttri.substr(getAttri.find_first_of(" \t,"));
+				getAttri = getAttri.substr(getAttri.find_first_not_of(" \t,"));
+				showAttri.push_back(getAttri.substr(0, getAttri.find_first_of(" \t,")));
+			}
+			query = query.substr(conditionStart);
+			char operation;
+			if (query.find("or") != string::npos) {
+				operation = 'o';
+			}
+			else
+			{
+				operation = 'a';
+			}
+			oper = operation == 'a' ? "and" : "or";
+			string subCon = query = query.substr(query.find_first_not_of(" \t"));//where 后第一个非空格字符
+			subCon = query = query.substr(0, query.find_last_of(";") + 1);
+			while (query != ";")
+			{
+				string attri = subCon.substr(0, subCon.find_first_of(" "));
+				con.columnNum = catalog.getAttr_no(T, attri);
+				if (con.columnNum == -1) {
+					//提前结束 出错了  不存在的字段。
+				}
+				attri += " ";
+				subCon = subCon.substr(subCon.find_first_not_of(attri));// 舍去attribute name
+				string op = subCon.substr(0, subCon.find_first_of(" "));
+				if (op == ">=")
+					con.op = Ge;
+				else if (op == "<=")
+					con.op = Le;
+				else if (op == ">")
+					con.op = Gt;
+				else if (op == "<")
+					con.op = Lt;
+				else if (op == "!=" || op == "<>")
+					con.op = Ne;
+				else
+					con.op = Eq;
+				subCon = subCon.substr(subCon.find_first_of("\'\""));
+				con.value = subCon.substr(1).substr(0, subCon.substr(1).find_first_of("\"\'"));
+				query = subCon = subCon.substr(subCon.find_first_not_of(con.value + "\'\" " + oper));
+				cons.push_back(con);
+
+			}
+		}
+
+		
+
+	DATA res = record.select(T, cons, oper[0]);
+	cout << endl;
+		for (size_t i = 0; i < res.ResultSet.size(); i++)
+		{
+			for (size_t j = 0; j < res.ResultSet[i].DataField[j].size(); j++)
+			{
+				cout << res.ResultSet[i].DataField[j]<<"    ";
+			}
+			cout << endl;
+		}
+		if (!res.ResultSet.size())
+			cout << "No matching records." << endl;
+
+
 			/// <问题来了，记得判定是or还是and连接！
 			/// 此处先假设是and
 			/// 记得改回去 
-			DATA resultSelect = record.select(tab, cons, 'a');
-			for (auto each : resultSelect.ResultSet)
-				for (auto each1 : each.DataField)
-					cout << each1;
+			//DATA resultSelect = record.select(tab, cons, 'a');
+			//for (auto each : resultSelect.ResultSet)
+			//	for (auto each1 : each.DataField)
+			//		cout << each1;
 			//再加一个接口
 			//条件全部保存在cons里
 		}
@@ -385,7 +483,7 @@ void Interpreter::Select()
 		//for (int k = 0;k < cons.size();k++)//验证cons内容是否正确
 		//	cout << cons[k].columnNum << endl << cons[k].op << endl << cons[k].value << endl;
 	}
-}
+
 
 void Interpreter::Insert()
 {
@@ -492,11 +590,19 @@ void Interpreter::Delete()
 	j = Next(i);
 	length = j - i;
 	table_name = query.substr(i, length);
+	Table T = catalog.getTable_info(table_name);
 	if (query[j] == ';')			//例如：delete from student;
 	{
 		//删除表的接口
-		CatalogManager cat;
-		cat.dropTable(table_name);
+		vector<Condition> con;
+		RecordResult res = record.deleteR(T, con, 'a');
+		if (res.status) {
+			cout << "Successful deletion." << endl;
+		}
+		else
+		{
+			cout << "Failed to execute the command. " << res.Reason << endl;
+		}
 	}
 	else                            //例如：delete from student where sno = '88888888';
 	{
@@ -559,8 +665,56 @@ void Interpreter::Delete()
 
 		//先暂时只给一个condition
 		vector <Condition> cons;
-		cons.push_back(con);
-		record.deleteR(tab, cons, 'a');
+		size_t conditionStart = query.find("where")+5;
+		size_t subStart = conditionStart ;
+		query = query.substr(conditionStart );
+		char operation;
+		if (query.find("or")!=string::npos) {
+			operation = 'o';
+		}
+		else
+		{
+			operation = 'a';
+		}
+		string oper = operation == 'a' ? "and" : "or";
+		string subCon = query = query.substr(query.find_first_not_of(" \t"));//where 后第一个非空格字符
+		subCon = query = query.substr(0, query.find_last_of(";")+1);
+		while (query!=";")
+		{
+			string attri = subCon.substr(0, subCon.find_first_of(" ") );
+			con.columnNum = catalog.getAttr_no(T, attri);
+			if (con.columnNum == -1) {
+				//提前结束 出错了  不存在的字段。
+			}
+			attri += " ";
+			subCon = subCon.substr(subCon.find_first_not_of(attri));// 舍去attribute name
+			string op = subCon.substr(0, subCon.find_first_of(" "));
+			if (op==">=")
+				con.op = Ge;
+			else if (op=="<=")
+				con.op = Le;
+			else if (op==">")
+				con.op = Gt;
+			else if (op=="<")
+				con.op = Lt;
+			else if (op=="!="||op=="<>")
+				con.op = Ne;
+			else
+				con.op = Eq;
+			subCon = subCon.substr(subCon.find_first_of("\'\""));
+			con.value = subCon.substr(1).substr(0,subCon.substr(1).find_first_of("\"\'"));
+			query=subCon = subCon.substr(subCon.find_first_not_of(con.value+"\'\" "+oper));
+			cons.push_back(con);
+
+		}
+		RecordResult res=record.deleteR(tab, cons, oper[0]);
+		if (res.status) {
+			cout << "Successful deletion." << endl;
+		}
+		else
+		{
+			cout << "Failed to execute the command. " << res.Reason << endl;
+		}
 	}
 }
 
