@@ -145,7 +145,7 @@ void Interpreter::Create_Table()
 				{
 					char_length = temp[1].substr(5, temp[1].length() - 6);
 					//cout << char_length<<endl;
-					attr.length = atoi(char_length.c_str()) + 1;
+					attr.length = atoi(char_length.c_str());// + 1;
 				}
 				break;
 			default:
@@ -470,7 +470,14 @@ void Interpreter::Insert()
 	
 	//map->string
 
-	record.insert(tab, Value);
+	const RecordResult& res=record.insert(tab, Value);
+	if (!res.status) {
+		cout << res.Reason << endl;
+	}
+	else
+	{
+		cout << "Successful insertion" << endl;
+	}
 	//再加一个他接口
 	//内容全部保存在Value里面，是一个字符串的容器，所有类型都是以字符串形式存储起来
 }
