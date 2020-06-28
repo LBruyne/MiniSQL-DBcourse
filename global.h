@@ -59,15 +59,15 @@ public:
 	string name;
 	int type;
 	int length;
-	bool isPrimeryKey;
+	bool isPrimaryKey;
 	bool isUnique;
 	Attribute()
 	{
-		isPrimeryKey = false;
+		isPrimaryKey = false;
 		isUnique = false;
 	}
 	Attribute(string n, int t, int l, bool isP, bool isU)
-		:name(n), type(t), length(l), isPrimeryKey(isP), isUnique(isU) {}
+		:name(n), type(t), length(l), isPrimaryKey(isP), isUnique(isU) {}
 };
 
 class Table
@@ -115,7 +115,40 @@ struct DATA
 {
 	vector<Row> ResultSet;
 };
-
+//写这个东西的原因：老师给的字符串的大小比较可能不按套路来
+//比如 nber5 按道理应该 < nber100
+//然而string的运算符是按照字典序来的  也就是nber100>nber5  
+//替换工作量非常大，暂时先不动。
+/*
+class sqlString {
+public:
+	string Content;
+	sqlString() {}
+	sqlString(const string& copy) :Content(copy) {}
+	sqlString& operator=(const sqlString& copy) {
+		Content = copy.Content;
+		return *this;
+	}
+	bool operator ==(const sqlString& cmp) {
+		return Content == cmp.Content;
+	}
+	bool operator!=(const sqlString& cmp) {
+		return !((*this) == cmp);
+	}
+	bool operator >(const sqlString& cmp) {
+		return (Content.length() == cmp.Content.length() && Content > cmp.Content) || (Content.length() > cmp.Content.length());
+	}
+	bool operator <=(const sqlString& cmp) {
+		return !(*this > cmp);
+	}
+	bool operator <(const sqlString& cmp) {
+		return (cmp > * this);
+	}
+	bool operator <=(const sqlString& cmp) {
+		return cmp >= *this;
+	}
+};
+*/
 
 
 #endif
