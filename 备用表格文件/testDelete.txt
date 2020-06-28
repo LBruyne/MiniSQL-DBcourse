@@ -1,0 +1,19 @@
+delete from student;//清空表格  √
+delete from student where sname = 'y0' and sgender = 'M'; √//没有任何索引 合取
+delete from student where sname = 'y110'; √
+delete from student where sname >= 'y108';  √ 按照字典序的大小比较方法：先比长度，再按位比较
+delete from student where sname <= 'y2' or sname >= 'y109';  √ //无索引 析取
+//无索引的删除
+
+delete from student where sno = 'nber0'; √
+delete from student where sno = 'nber70'; √
+delete from student where sno = 'nber109'; √
+delete from student where sno = 'nber110'; √
+delete from student where sno = 'nber0' and sno = 'nber1'; √
+delete from student where sno != 'nber0' or sgender <> 'F'; √ 最优的索引上的判定是==
+
+delete from student where sno < 'nber66' and sgender = 'M'; 最优的索引上的判定是<
+//<del>出大问题 糙<del>
+delete from student where sno >= 'nber105' or sno < 'nber3'; 
+
+//以上为功能测试

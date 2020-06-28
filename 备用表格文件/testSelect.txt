@@ -1,0 +1,13 @@
+select * from student; //√
+select sno , sgender from student; //√
+//无where
+
+
+select * from student where sno = 'nber1';	//√ one result
+select * from student where sno = 'nber120';	// √no result
+select * from student where sno < 'nber2' and sgender = 'F';	//and √
+select sno , sage from student where sgender = 'F' or sage = '23'; // √ 没有索引可用的情况。
+select sno , sage from student where sage = '23'; //  √ 测试上一个的sage对不对 
+select sno , sgender from student where sname < 'y2' or sno > 'nber89';	
+//√ 虽然答案很奇怪 但是确实符合 string自带的> <比较操作含义
+//可以考虑自己写一个string的wrapper来改善这种制杖情况
