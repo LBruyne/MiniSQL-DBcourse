@@ -37,6 +37,7 @@ void CatalogManager::readIndex() {
 		Index index;
 		fin >> index.index_name;
 		fin >> index.table_name;
+		fin >> index.attribute_name;
 		fin >> index.column;
 		fin >> index.columnLength;
 		fin >> index.blockNum;
@@ -79,6 +80,7 @@ void CatalogManager::writeIndex()
 	{
 		fout << Indexes[i].index_name << " ";
 		fout << Indexes[i].table_name << " ";
+		fout << Indexes[i].attribute_name << " ";
 		fout << Indexes[i].column << " ";
 		fout << Indexes[i].columnLength << " ";
 		fout << Indexes[i].blockNum << endl;
@@ -298,4 +300,20 @@ void CatalogManager::changeTable(Table& T) {
 	for (int i = 0; i < tableNum; i++)
 		if ((Tables[i].name) == T.name)
 			Tables[i].blockNum = T.blockNum;	
+}
+
+void CatalogManager::clear() {
+	Tables.clear();
+	Indexes.clear();
+	tableNum = 0;
+	indexNum = 0;
+}
+
+void CatalogManager::reload()
+{
+	writeTable();
+	writeIndex();
+	clear();
+	readTable();
+	readIndex();
 }

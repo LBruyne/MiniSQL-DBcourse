@@ -61,5 +61,9 @@ public:
 	void ShowTableCatalog();
 
 	void ShowIndexCatalog();
+
+	void clear();
+
+	void reload();
 };
 
