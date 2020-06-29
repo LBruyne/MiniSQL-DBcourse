@@ -883,7 +883,7 @@ bool IndexManager::CreateIndex(Table& table)
 	return false;
 }
 
-bool IndexManager::HasIndex(std::string& TableName, std::string& AttribName)
+bool IndexManager::HasIndex(const std:: string& TableName, std::string& AttribName)
 {
 	std::string FileName = TableName + std::string("_") + AttribName + std::string(".index");
 	FILE* fp = fopen(FileName.c_str(), "rb");
@@ -895,7 +895,7 @@ bool IndexManager::HasIndex(std::string& TableName, std::string& AttribName)
 	}
 }
 
-bool IndexManager::DropIndex(std::string& TableName, std::string& AttribName)
+bool IndexManager::DropIndex(const std::  string& TableName, std::string& AttribName)
 {
 	std::string FileName = TableName + std::string("_") + AttribName + std::string(".index");
 	FILE* fp = fopen(FileName.c_str(), "rb");

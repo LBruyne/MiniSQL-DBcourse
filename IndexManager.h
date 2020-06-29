@@ -30,8 +30,8 @@ public:
 	IndexManager();
 	bool CreateIndex(Table &table, Index &index);
 	bool CreateIndex(Table &table);
-	bool HasIndex(std::string &TableName, std::string &AttribName);
-	bool DropIndex(std::string &TableName, std::string &AttribName);
+	bool HasIndex(const std::string &TableName, std::string &AttribName);
+	bool DropIndex(const std::string &TableName, std::string &AttribName);
 	void ResetBptInt(bool save);
 	void ResetBptFloat(bool save);
 	void ResetBptString(bool save);
