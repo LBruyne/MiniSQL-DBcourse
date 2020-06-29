@@ -26,6 +26,7 @@ int main()
 	bool execfile = false;
 	while (i.flag == true)
 	{
+		cout << "MINI SQL >>>" << ends;
 		i.Query();
 		i.Choice();
 	}
