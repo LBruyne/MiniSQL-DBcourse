@@ -22,7 +22,7 @@ public:
 	//以下为表操作
 	using TableResult = RecordResult;
 	TableResult create(Table& T);
-	TableResult drop(Table& T);
+	TableResult drop(const Table& T);
 
 private:
 	void SetCondition(bool&, vector<Condition>&,char);
