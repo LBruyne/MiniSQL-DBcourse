@@ -36,14 +36,14 @@ private:
 	//没有索引就从头到尾遍历
 	//给出的参数是区分操作类型和谓词连接类型
 	void ScanTable(Table&, RecordResult&, vector<Condition>&, bool negative = 0);
-	bool comp(Table&,Condition&, Condition&);
+	inline bool comp(Table&,Condition&, Condition&);
 	void MySort(Table&, vector<Condition> &);
-	void splitRow(const string&, Row&, Table&);
-	void testifyOneRow(Row&, vector<Condition>&, bool&, DATA&);
-	bool testifyOneRow(Row&, vector<Condition>&, bool&);
+	inline void splitRow(const string&, Row&, Table&);
+	inline void testifyOneRow(Row&, vector<Condition>&, bool&, DATA&,Table&);
+	inline bool testifyOneRow(Row&, vector<Condition>&, bool&,Table&);
 	void deleteIndex(Table&, Row&);
-	void insertIndex(Table&, Row&,const Pointer&);
-	void checkDuplicate(Table&, vector<string>&, RecordResult&);
+	inline void insertIndex(Table&, Row&,const Pointer&);
+	inline void checkDuplicate(Table&, vector<string>&, RecordResult&);
 
 };
 
