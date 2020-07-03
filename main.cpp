@@ -24,10 +24,18 @@ int main()
 {
 
 	bool execfile = false;
+	static auto _ = []()
+	{
+		ios::sync_with_stdio(false);
+		cin.tie(0);
+		cout.tie(0);
+		return 0;
+	}();
 	while (i.flag == true)
 	{
 		cout << "MINI SQL >>>" << ends;
 		i.Query();
+		if(i.query!="")
 		i.Choice();
 	}
 	system("pause");
