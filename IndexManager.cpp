@@ -1,8 +1,8 @@
 /*
  * File name: BufferManager.cpp
  * Author: Xuanming, Liu
- * Latest revised: 2020.06.18 
- * Description: 
+ * Latest revised: 2020.06.18
+ * Description:
  * Implementation for IndexManagement and B+ tree.
 **/
 
@@ -233,46 +233,61 @@ void BPlusTree<T>::Insert(const T& data, const Pointer& pointer) {
 }
 
 template<class T>
-bool BPlusTree<T>::_Borrow(Node<T>* node) {
+bool BPlusTree<T>::_Borrow(Node<T>* node, T& data) {
 	Node<T>* parent = node->parent;
-	Node<T>* leftSibling = node->before;
-	Node<T>* rightSibling = node->next;
+	Node<T>* leftSibling = (node->before == nullptr ? nullptr : (node->before->parent == node->parent ? node->before : nullptr));
+	Node<T>* rightSibling = (node->next == nullptr ? nullptr : (node->next->parent == node->parent ? node->next : nullptr));
+	int indexP;
+	if (parent) {
+		// data is not the first position.
+		if (_Find(data, parent) == -1)
+			indexP = _Find(node->values[0], parent);
+		// data is the first position originally.
+		else
+			indexP = _Find(data, parent) == -1;
+	}
 	if (leftSibling && ((!leftSibling->children[0] && leftSibling->numElements > (MaxChildrens / 2)) ||
 		(leftSibling->children[0] && leftSibling->numElements > (MaxChildrens - 1) / 2))) {
+		// cur node to right shift one position.
 		memcpy(node->values + 1, node->values, sizeof(T) * (MaxChildrens - 1));
 		memcpy(node->element + 1, node->element, sizeof(Pointer) * (MaxChildrens - 1));
-		memcpy(node->children + 1, node->children, sizeof(Node<T>*) * (MaxChildrens));
-		if (parent) {
-			int i = _Find(node->values[0], parent);
-			parent->values[i] = leftSibling->values[leftSibling->numElements - 1];
-			parent->element[i] = leftSibling->element[leftSibling->numElements - 1];
-		}
+		memcpy(node->children + 2, node->children + 1, sizeof(Node<T>*) * (MaxChildrens));
+		// borrow one from leftSibling
 		node->values[0] = leftSibling->values[leftSibling->numElements - 1];
 		node->element[0] = leftSibling->element[leftSibling->numElements - 1];
-		node->children[0] = leftSibling->children[leftSibling->numElements];
+		node->children[1] = leftSibling->children[leftSibling->numElements];
+		// shift the last children
 		if (leftSibling->children[leftSibling->numElements])
 			leftSibling->children[leftSibling->numElements]->parent = node;
+		if (parent) {
+			parent->values[indexP] = node->values[0];
+			parent->element[indexP] = node->element[0];
+			parent->children[indexP + 1] = node;
+		}
 		node->numElements++;
-		leftSibling->numElements++;
+		leftSibling->numElements--;
 		return true;
 	}
 	else if (rightSibling && ((!rightSibling->children[0] && rightSibling->numElements > (MaxChildrens / 2)) ||
 		(rightSibling->children[0] && rightSibling->numElements > (MaxChildrens - 1) / 2))) {
 		if (parent) {
-			int i = _Find(rightSibling->values[0], parent);
-			parent->values[i] = rightSibling->values[1];
-			parent->element[i] = rightSibling->element[1];
+			indexP = _Find(rightSibling->values[0], parent);
+			parent->values[indexP] = rightSibling->values[1];
+			parent->element[indexP] = rightSibling->element[1];
+			parent->children[indexP + 1] = rightSibling;
 		}
-		if (rightSibling->children[0])
-			rightSibling->children[0]->parent = node;
+		// borrow one from right.
 		node->values[node->numElements] = rightSibling->values[0];
 		node->element[node->numElements] = rightSibling->element[0];
 		node->children[node->numElements] = rightSibling->children[0];
+		if (rightSibling->children[1])
+			rightSibling->children[1]->parent = node;
+		// rightSibing to left shift one position.	
 		memcpy(rightSibling->values, rightSibling->values + 1, sizeof(T) * (MaxChildrens - 1));
 		memcpy(rightSibling->element, rightSibling->element + 1, sizeof(Pointer) * (MaxChildrens - 1));
-		memcpy(rightSibling->children, rightSibling->children + 1, sizeof(Node<T>*) * (MaxChildrens));
+		memcpy(rightSibling->children + 1, rightSibling->children + 2, sizeof(Node<T>*) * (MaxChildrens));
 		node->numElements++;
-		rightSibling->numElements++;
+		rightSibling->numElements--;
 		return true;
 	}
 	else
@@ -280,46 +295,61 @@ bool BPlusTree<T>::_Borrow(Node<T>* node) {
 }
 
 template<class T>
-bool BPlusTree<T>::_Merge(Node<T>* node) {
+bool BPlusTree<T>::_Merge(Node<T>* node, T& data) {
 	Node<T>* parent = node->parent;
-	Node<T>* leftSibling = node->before;
-	Node<T>* rightSibling = node->next;
+	Node<T>* leftSibling = (node->before == nullptr ? nullptr : (node->before->parent == node->parent ? node->before : nullptr));
+	Node<T>* rightSibling = (node->next == nullptr ? nullptr : (node->next->parent == node->parent ? node->next : nullptr));
+	int indexP;
+	if (parent) {
+		// data is not the first position.
+		if (_Find(data, parent) == -1)
+			indexP = _Find(node->values[0], parent);
+		// data is the first position originally.
+		else
+			indexP = _Find(data, parent) == -1;
+	}
 	if (leftSibling && ((!leftSibling->children[0] && leftSibling->numElements + node->numElements < MaxChildrens - 1) ||
 		(leftSibling->children[0] && leftSibling->numElements + node->numElements < MaxChildrens - 2))) {
+		// merge to leftSibling
 		memcpy(leftSibling->values + leftSibling->numElements, node->values, sizeof(T) * (node->numElements));
 		memcpy(leftSibling->element + leftSibling->numElements, node->element, sizeof(Pointer) * (node->numElements));
-		memcpy(leftSibling->children + leftSibling->numElements, node->children, sizeof(Node<T>*) * (node->numElements));
+		memcpy(leftSibling->children + leftSibling->numElements + 1, node->children + 1, sizeof(Node<T>*) * (node->numElements));
 		if (parent) {
-			int i = _Find(node->values[0], parent);
+			int i = indexP;
 			memcpy(parent->values + i, parent->values + i + 1, sizeof(T) * (MaxChildrens - i - 1));
 			memcpy(parent->element + i, parent->element + i + 1, sizeof(Pointer) * (MaxChildrens - i - 1));
-			memcpy(parent->children + i, parent->children + i + 1, sizeof(Node<T>*) * (MaxChildrens - i));
+			memcpy(parent->children + i + 1, parent->children + i + 2, sizeof(Node<T>*) * (MaxChildrens - i));
+			parent->numElements--;
 		}
 		if (node->children[0])
 			for (int i = 0; i < node->numElements; i++) {
 				node->children[i]->parent = leftSibling;
 			}
 		leftSibling->numElements += node->numElements;
-		delete node;
+		leftSibling->next = node->next;
+		node->next->before = leftSibling;
 		return true;
 	}
 	else if (rightSibling && ((!rightSibling->children[0] && rightSibling->numElements + node->numElements < MaxChildrens - 1) ||
 		(rightSibling->children[0] && rightSibling->numElements > +node->numElements < MaxChildrens - 2))) {
+		// merge to left.
 		memcpy(node->values + node->numElements, rightSibling->values, sizeof(T) * (rightSibling->numElements));
 		memcpy(node->element + node->numElements, rightSibling->element, sizeof(Pointer) * (rightSibling->numElements));
-		memcpy(node->children + node->numElements, rightSibling->children, sizeof(Node<T>*) * (rightSibling->numElements));
+		memcpy(node->children + node->numElements + 1, rightSibling->children + 1, sizeof(Node<T>*) * (rightSibling->numElements));
 		if (parent) {
 			int i = _Find(rightSibling->values[0], parent);
 			memcpy(parent->values + i, parent->values + i + 1, sizeof(T) * (MaxChildrens - i - 1));
 			memcpy(parent->element + i, parent->element + i + 1, sizeof(Pointer) * (MaxChildrens - i - 1));
-			memcpy(parent->children + i, parent->children + i + 1, sizeof(Node<T>*) * (MaxChildrens - i));
+			memcpy(parent->children + i + 1, parent->children + i + 2, sizeof(Node<T>*) * (MaxChildrens - i));
+			parent->numElements--;
 		}
 		if (rightSibling->children[0])
 			for (int i = 0; i < rightSibling->numElements; i++) {
 				rightSibling->children[i]->parent = leftSibling;
 			}
 		node->numElements += rightSibling->numElements;
-		delete rightSibling;
+		node->next = rightSibling->next;
+		rightSibling->next->before = node;
 		return true;
 	}
 	else
@@ -332,31 +362,29 @@ void BPlusTree<T>::_DeleteKey(Node<T>* node, T& data) {
 	int index = _Find(data, node);
 	int indexP = -1;
 	Node<T>* parent = node->parent;
+	if (index != -1) {
+		memcpy(node->values + index, node->values + index + 1, sizeof(T) * (MaxChildrens - 1 - index));
+		memcpy(node->element + index, node->element + index + 1, sizeof(Pointer) * (MaxChildrens - 1 - index));
+		memcpy(node->children + index + 1, node->children + index + 2, sizeof(Node<T>*) * (MaxChildrens - 1 - index));
+		node->numElements--;
+		// this may be wrong.
+		if (node == this->root && node->numElements == 0) {
+			this->root = node->children[0];
+			if (this->root != NULL) this->root->parent = NULL;
+			delete node;
+			return;
+		}
+		// if not half-filling, borrow or merge.
+		if (node != root && ((node->children[0] && node->numElements < (MaxChildrens / 2)) ||
+			(!node->children[0] && node->numElements < (MaxChildrens - 1) / 2))) {
+			if (!_Borrow(node, data))
+				_Merge(node, data);
+		}
+	}
+	// recursion to delete the parent.
 	if (parent)
-		indexP = _Find(data, parent);
-	if (index == -1 && indexP == -1)
-		return;
-	if (index == -1 && indexP != -1) {
-		_DeleteKey(node->parent, data);
-		return;
-	}
-	memcpy(node->values + index, node->values + index + 1, sizeof(T) * (MaxChildrens - 1 - index));
-	memcpy(node->element + index, node->element + index + 1, sizeof(Pointer) * (MaxChildrens - 1 - index));
-	memcpy(node->children + index + 1, node->children + index + 2, sizeof(Node<T>*) * (MaxChildrens - 1 - index));
-	node->numElements--;
-	if (node == this->root && node->numElements == 0) {
-		this->root = node->children[0];
-		if (this->root != NULL) this->root->parent = NULL;
-		delete node;
-		return;
-	}
-	if (node != root && ((node->children[0] && node->numElements < (MaxChildrens / 2)) ||
-		(!node->children[0] && node->numElements < (MaxChildrens - 1) / 2))) {
-		if (!_Borrow(node))
-			_Merge(node);
-	}
-	if (index == 0 && parent)
 		_DeleteKey(parent, data);
+
 	return;
 }
 
@@ -404,7 +432,7 @@ bool BPlusTree<T>::Find(const T& data, Pointer& pointer) {
 template<class T>
 Pointer BPlusTree<T>::FindPointer(const T& data) {
 	Node<T>* node = this->root;
-	int i; 
+	int i;
 	while (node) {
 		for (i = 0; i < node->numElements; i++) {
 			if (node->values[i] > data) {
@@ -740,6 +768,7 @@ int BPlusTree<T>::PrintAll() {
 			count++;
 			std::cout << node->values[i] << " ";
 		}
+		std::cout << "    ";
 		node = node->next;
 	}
 	std::cout << std::endl;
@@ -820,30 +849,30 @@ bool IndexManager::CreateIndex(Table& table, Index& index)
 	int type = table.attributes[index.column].type;
 	switch (type)
 	{
-		case INT:
-		{
-			ResetBptInt(true);
-			bpt_INT = new BPlusTree<int>(table.name, table.attributes[index.column].name, 20);
-			bpt_INT->Save(FileName.c_str());
-			bptIntName = FileName;
-			return true;
-		}
-		case FLOAT:
-		{
-			ResetBptFloat(true);
-			bpt_FLOAT = new BPlusTree<float>(table.name, table.attributes[index.column].name, 20);
-			bpt_FLOAT->Save(FileName.c_str());
-			bptFloatName = FileName;
-			return true;
-		}
-		case CHAR:
-		{
-			ResetBptString(true);
-			bpt_STRING = new BPlusTree<std::string>(table.name, table.attributes[index.column].name, 20);
-			bpt_STRING->Save(FileName.c_str());
-			bptStringName = FileName;
-			return true;
-		}
+	case INT:
+	{
+		ResetBptInt(true);
+		bpt_INT = new BPlusTree<int>(table.name, table.attributes[index.column].name, 20);
+		bpt_INT->Save(FileName.c_str());
+		bptIntName = FileName;
+		return true;
+	}
+	case FLOAT:
+	{
+		ResetBptFloat(true);
+		bpt_FLOAT = new BPlusTree<float>(table.name, table.attributes[index.column].name, 20);
+		bpt_FLOAT->Save(FileName.c_str());
+		bptFloatName = FileName;
+		return true;
+	}
+	case CHAR:
+	{
+		ResetBptString(true);
+		bpt_STRING = new BPlusTree<std::string>(table.name, table.attributes[index.column].name, 20);
+		bpt_STRING->Save(FileName.c_str());
+		bptStringName = FileName;
+		return true;
+	}
 	}
 	return false;
 }
@@ -883,7 +912,7 @@ bool IndexManager::CreateIndex(Table& table)
 	return false;
 }
 
-bool IndexManager::HasIndex(const std:: string& TableName, std::string& AttribName)
+bool IndexManager::HasIndex(const std::string& TableName, std::string& AttribName)
 {
 	std::string FileName = TableName + std::string("_") + AttribName + std::string(".index");
 	FILE* fp = fopen(FileName.c_str(), "rb");
@@ -895,7 +924,7 @@ bool IndexManager::HasIndex(const std:: string& TableName, std::string& AttribNa
 	}
 }
 
-bool IndexManager::DropIndex(const std::  string& TableName, std::string& AttribName)
+bool IndexManager::DropIndex(const std::string& TableName, std::string& AttribName)
 {
 	std::string FileName = TableName + std::string("_") + AttribName + std::string(".index");
 	FILE* fp = fopen(FileName.c_str(), "rb");
