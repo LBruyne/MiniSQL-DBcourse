@@ -16,7 +16,7 @@ void Interpreter::Query()
 	string s;
 	getline(cin, s);
 	query = s;
-	while (query==""||query.length()>0&&query[query.length() - 1] != ';')
+	while (query.length()>0&&query[query.length() - 1] != ';')
 	{
 		getline(cin, s);
 		query += s;
@@ -24,9 +24,13 @@ void Interpreter::Query()
 	//cout << query << endl;
 
 }
+inline string Interpreter::getQ() {
+	return query;
+}
 
 void Interpreter::Choice()
 {
+	cout << query << endl;
 	if (query.substr(0, 6) == "select")
 		Select();
 
@@ -536,9 +540,10 @@ void Interpreter::Select()
 						return;
 						//提前结束 出错了  不存在的字段。
 					}
-					attri += " ";
+					//attri += " ";
 					subCon = subCon.substr(subCon.find_first_not_of(attri));// 舍去attribute name
-					string op = subCon.substr(0, subCon.find_first_of(" "));
+					string op = subCon=subCon.substr(subCon.find_first_not_of(" \t"));
+					op = subCon.substr(0, subCon.find_first_of(" \t"));
 					if (op == ">=")
 						con.op = Ge;
 					else if (op == "<=")
@@ -820,6 +825,10 @@ void Interpreter::Delete()
 		Condition con;
 		Table tab;
 		vector <Condition> cons;
+		string table_name(query.substr(query.find("from") + 4));
+		table_name = table_name.substr(table_name.find_first_not_of(" \t"));
+		table_name = table_name.substr(0,table_name.find_first_of(" \t"));
+		tab=catalog.getTable_info(table_name);
 		size_t conditionStart = query.find("where")+5;
 		size_t subStart = conditionStart ;
 		query = query.substr(conditionStart );
@@ -837,14 +846,14 @@ void Interpreter::Delete()
 		subCon = query = query.substr(0, query.find_last_of(";")+1);
 		while (query!=";")
 		{
-			string attri = subCon.substr(0, subCon.find_first_of(" ") );
+			string attri = subCon.substr(0, subCon.find_first_of(" \t") );
 			con.columnNum = catalog.getAttr_no(T, attri);
 			if (con.columnNum == -1) {
 				//提前结束 出错了  不存在的字段。
 			}
 			attri += " ";
 			subCon = subCon.substr(subCon.find_first_not_of(attri));// 舍去attribute name
-			string op = subCon.substr(0, subCon.find_first_of(" "));
+			string op = subCon.substr(0, subCon.find_first_of(" \t"));
 			if (op==">=")
 				con.op = Ge;
 			else if (op=="<=")
@@ -899,6 +908,7 @@ void Interpreter::Execfile()
 	{
 		//throw Exception("The File Does Not Exist");
 		cout << "The File Does Not Exist" << endl;
+		return;
 	}
 	query.clear();
 	while (!file.eof())
