@@ -98,12 +98,26 @@ void CatalogManager::createTable(Table& table)
 	else
 	{
 		tableNum++;
-		for (int i = 0; i < table.attributes.size(); i++) 
-			table.totalLength += table.attributes[i].length;
-		table.totalLength += 1;//最后一位是有效位
+		//for (int i = 0; i < table.attributes.size(); i++) 
+		//	table.totalLength += table.attributes[i].length;
+		//table.totalLength += 1;//最后一位是有效位
 		Tables.push_back(table);
 	}
 	index.CreateIndex(table);
+	Index newindex;
+	newindex.table_name = table.name;
+	for (size_t i = 0; i < table.attributes.size(); i++)
+	{
+		if (table.attributes[i].isPrimaryKey)
+		{
+			newindex.index_name = table.attributes[i].name;
+			newindex.column = i;
+			newindex.columnLength = table.attributes[i].length;
+			newindex.attribute_name = table.attributes[i].name;
+			break;
+		}
+	}
+	createIndex(newindex);
 	FILE* newfile;
 	string filename = table.name + ".record";
 	newfile=fopen(filename.c_str(),"wb");
@@ -190,7 +204,7 @@ Table CatalogManager::getTable_info(string table_name)
 	for (int i = 0;i < tableNum;i++) 
 		if ((Tables[i].name) == table_name) 
 			return Tables[i];
-	cout << "No Table Named " << table_name << endl;
+	//cout << "No Table Named " << table_name << endl;
 	return temp;
 }
 
@@ -207,7 +221,7 @@ Index CatalogManager::getIndex_info(string index_name)
 	}
 	if (flag==0) 
 	{
-		cout << "No Index Named " << index_name << endl;
+		//cout << "No Index Named " << index_name << endl;
 		Index tmpt;
 		return tmpt;		//没找到
 	}

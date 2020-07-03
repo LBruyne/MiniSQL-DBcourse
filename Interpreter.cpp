@@ -10,12 +10,13 @@ extern RecordManager record;
 extern IndexManager index;
 extern CatalogManager catalog;
 extern BufferManager buf;
+using namespace std;
 void Interpreter::Query()
 {
 	string s;
 	getline(cin, s);
 	query = s;
-	while (query[query.length() - 1] != ';')
+	while (query==""||query.length()>0&&query[query.length() - 1] != ';')
 	{
 		getline(cin, s);
 		query += s;
@@ -63,16 +64,8 @@ void Interpreter::Choice()
 
 void Interpreter::Create_Table()
 {
-	cout << "Create_Table" << endl;
 
-	string table_name,str;
-	Table tab;
-	Attribute attr;
-	vector<string>temp;
-	string values, value;
-	vector<string> Value;
-	vector<int>comma_index;
-
+	/*
 	int comma_num = 0;
 	int i, j, length;
 
@@ -196,12 +189,75 @@ void Interpreter::Create_Table()
 	}
 	tab.name = table_name;
 	tab.attriNum = tab.attributes.size();
-
-
+	
+	*/
 	//for (int k = 0;k < tab.attributes.size();k++)
 	//	cout << tab.attributes[k].name <<" "<<tab.attributes[k].isUnique<< " " << tab.attributes[k].isPrimaryKey<<" " << tab.attributes[k].type<< endl;
 	//再接一个Catalog接口
 
+	cout << "Create_Table" << endl;
+
+	Table tab;
+	string keyword;
+	size_t index;
+	//先获取表格名字
+	keyword = query.substr(query.find("table")+5);
+	keyword = keyword.substr(keyword.find_first_not_of(" \t"));
+	keyword = keyword.substr(0, keyword.find_first_of(" \t"));
+	tab.name = keyword;
+	query = query.substr(query.find(tab.name) + tab.name.length());
+	query = query.substr(query.find_first_not_of(" \t\n("));
+	do
+	{
+		Attribute attr;
+		query = query.substr(query.find_first_not_of(" \t"));
+		keyword = query.substr(0, query.find_first_of(" \t"));
+		attr.name = keyword;
+		query = query.substr(keyword.length());
+		//获取属性名字
+		if (keyword != "primary") {
+			query = query.substr(query.find_first_not_of(" \t"));
+			keyword = query.substr(0, query.find_first_of(" \t,"));
+			attr.type = keyword=="int"? INT: keyword=="float"? FLOAT:CHAR;
+			attr.length= keyword == "int" ? INTLENGTH : keyword == "float" ? FLOATLENGTH : 1;
+			if (attr.type == CHAR) {
+				keyword = keyword.substr(keyword.find("(")+1);
+				keyword = keyword.substr(keyword.find_first_not_of(" \t"));
+				keyword = keyword.substr(0, keyword.find_first_of(" )\t"));
+				attr.length = stoi(keyword);
+
+			}
+
+
+			//获取类型
+
+			if (index = keyword.find("unique") != string::npos) {
+				attr.isUnique = 1;
+				attr.isPrimaryKey = 0;
+			}
+			query = query.substr(query.find(",")+1);
+			tab.attributes.push_back(attr);
+		}
+		//primary key 语句 
+		
+		else{
+			query = query.substr(query.find("(")+1);
+			query = query.substr(query.find_first_not_of(" \t"));
+			query = query.substr(0, query.find_first_of(" \t;)"));
+			for (size_t i = 0; i < tab.attributes.size(); i++)
+			{
+				if (query == tab.attributes[i].name)
+				{
+					tab.attributes[i].isPrimaryKey = 1;
+				}
+				tab.totalLength += tab.attributes[i].length;
+			}
+			tab.totalLength++;
+			tab.attriNum = tab.attributes.size();
+			break;
+		}
+	} while (1);
+	
 	catalog.createTable(tab);
 	cout << "Succeed to create table" << endl;
 	catalog.reload();
@@ -211,8 +267,7 @@ void Interpreter::Create_Index()
 {
 	//create index 格式: 左右括号分别都要加空格，详见参考文档//例子：create index stunameidx on student ( sname );
 	cout << "Create_Index" << endl;
-
-	string index_name, table_name, attribute_name;
+	/*
 	string temp[4];					//create index 后有四个单词，如：create index stunameidx on student (sname)，四个单词分别是stunameidx、on、student和(sname)
 	int i, j, length;
 	i = 13;							//index_name的起始位置
@@ -229,9 +284,19 @@ void Interpreter::Create_Index()
 		cout << "Invalid Query of Create Index!" << endl;
 		//throw Exception("Invalid Query of Create Index");
 	}
-	index_name = temp[0];
-	table_name = temp[2];
-	attribute_name = temp[3].substr(1,temp[3].length()-2);
+	*/
+	string index_name, table_name, attribute_name;
+	index_name = query.substr(query.find("create index") + 12);
+	index_name = index_name.substr(index_name.find_first_not_of(" \t"));
+	index_name = index_name.substr(0, index_name.find_first_of(" \t"));
+	query = query.substr(query.find(index_name) + index_name.length());
+	query = query.substr(query.find("on") + 2);
+	query = query.substr(query.find_first_not_of(" \t"));
+	table_name = query.substr(0, query.find_first_of(" \t"));
+	query = query.substr(table_name.length());
+	query = query.substr(query.find_first_not_of(" \t("));
+	attribute_name = query.substr(0,query.find_first_of(" \t)"));
+
 
 	//cout << index_name << table_name << attribute_name << endl;
 
@@ -265,28 +330,26 @@ void Interpreter::Drop_Table()
 	cout << "Drop_Table" << endl;
 
 	string table_name;
-	int i, j, length;
-	i = 11;
-	j = Next(i);
-	length = j - i;
-	if (query[j] != ';')
+	table_name = query.substr(10);
+	table_name = table_name.substr(table_name.find_first_not_of(" \t"));
+	table_name = table_name.substr(0,table_name.find_first_of(" \t;"));
+	Table T = catalog.getTable_info(table_name);
+	if (T.name=="")
 	{
 		cout << "Invalid Query of Drop Table!" << endl;
 		//throw Exception("Invalid Query of Drop Table!");
 	}
 	else
 	{
-		table_name = query.substr(i, length);
 		//再加一个Catalog接口or其他接口
-		Table T = catalog.getTable_info(table_name);
 		RecordResult res=record.drop(T);
 		catalog.dropTable(table_name);
 		if (res.status)
 			cout << "Succeed to drop the table." << endl;
 		else
 			cout << res.Reason << endl;
+		catalog.reload();
 	}
-	catalog.reload();
 }
 
 void Interpreter::Drop_Index()
@@ -294,29 +357,20 @@ void Interpreter::Drop_Index()
 	cout << "Drop_Index" << endl;
 
 	string index_name;
-	int i, j,length;
-	i = 11;
-	j = Next(i);
-	length = j - i;
-	if (query[j ] != ';')
-	{
-		cout << "Invalid Query of Drop Index!" << endl;
-		//throw Exception("Invalid Query of Drop Index!");
-	}
-	else
-	{
-		index_name = query.substr(i, length);
-
-		//cout<<index_name<<endl;
-	}
-	//再加一个Catalog接口or其他接口
+	index_name = query.substr(10);
+	index_name = index_name.substr(index_name.find_first_not_of(" \t"));
+	index_name = index_name.substr(0, index_name.find_first_of(" \t;"));
 	Index id = catalog.getIndex_info(index_name);
 	Table T = catalog.getTable_info(id.table_name);
-	if (T.name == "" || id.attribute_name == "")
+
+	if (id.table_name=="")
 	{
-		cout << "Table or index doesn't exist. Please check your configuration." << endl;
+		cout << "No such index found." << endl;
 		return;
+		//throw Exception("Invalid Query of Drop Index!");
 	}
+	//再加一个Catalog接口or其他接口
+
 	index.DropIndex(T.name,id.attribute_name);
 	catalog.dropIndex(index_name);
 	cout << "Succeed to drop the index." << endl;
@@ -555,27 +609,63 @@ void Interpreter::Insert()
 	cout << "Insert" << endl;
 
 	string table_name;
-	if (query.substr(0, 11) != "insert into")
-	{
-		cout << "Invalid Query of Select!1";
-		//throw exception("Invalid Query of Select!");
-	}
-
-	int i, j, length;
-	i = 12;
-	j = Next(i);
-	length = j - i;
-	table_name = query.substr(i, length);
-
-	CatalogManager cat;
-	Condition con;
+	table_name = query=query.substr(11);
+	table_name = table_name.substr(table_name.find_first_not_of(" \t"));
+	table_name = table_name.substr(0, table_name.find_first_of(" \t"));
+	query = query.substr(query.find(table_name)+table_name.length());
 	Table tab;
-	string values,value;
-	vector<string> Value;
-	vector<int>comma_index;
+	vector<string> value;
+	//RecordResult res;
+	string keyword;
+	tab = catalog.getTable_info(table_name);
+	if (tab.name == "") {
+		cout << "No such table found!" << endl;
+		return;
+	}
+	query = query.substr(query.find("values")+6);
+	query = query.substr(query.find_first_not_of(" \t("));
+	for (size_t i = 0; i < tab.attributes.size(); i++)
+	{
+		switch (tab.attributes[i].type)
+		{
+		case INT:
+			keyword = query.substr(query.find_first_not_of(" \t,"));
+			keyword = query.substr(0,query.find_first_of(" \t,);"));
+
+			if (keyword.length() > INTLENGTH) {
+				cout << keyword << "is too long for int. Truncation occured." << endl;
+				keyword = keyword.substr(0, INTLENGTH);
+			}
+			value.push_back(keyword);
+			query = query.substr(query.find(keyword) + keyword.length());
+			break;
+
+		case FLOAT:
+			keyword = query.substr(query.find_first_not_of(" \t,"));
+			keyword = query.substr(0, query.find_first_of(" \t,);"));
+			if (keyword.length() > FLOATLEN) {
+				cout << keyword << "is too long for float. Truncation occured." << endl;
+				keyword = keyword.substr(0, FLOATLEN);
+			}
+			value.push_back(keyword);
+			query = query.substr(query.find(keyword) + keyword.length());
+			break;
+		case CHAR:
+			keyword = query=query.substr(query.find_first_not_of(" \t,'\""));
+			keyword = query.substr(0, query.find_first_of(" \t,'\");"));
+			if (keyword.length() > tab.attributes[i].length) {
+				cout << keyword << "is too long for "<< tab.name<<"."<<tab.attributes[i].name<<". Truncation occured." << endl;
+				keyword = keyword.substr(0, tab.attributes[i].length);
+			}
+			value.push_back(keyword);
+			query = query.substr(query.find(keyword) + keyword.length());
+			query = query.substr(query.find_first_not_of(",'\" \t"));
+			break;
+		}
+	}
+	/*
 	int comma_num = 0;
 
-	tab = cat.getTable_info(table_name);
 
 	i = j + 1;j = Next(i);length = j - i;
 	if (query.substr(i, length) != "values")
@@ -631,8 +721,8 @@ void Interpreter::Insert()
 	}
 	
 	//map->string
-
-	const RecordResult& res=record.insert(tab, Value);
+	*/
+	const RecordResult& res=record.insert(tab, value);
 	if (!res.status) {
 		cout << res.Reason << endl;
 	}
@@ -670,6 +760,7 @@ void Interpreter::Delete()
 	}
 	else                            //例如：delete from student where sno = '88888888';
 	{
+		/*
 		string temp[4];
 		for (int k = 0;k <= 3;k++)
 		{
@@ -689,8 +780,7 @@ void Interpreter::Delete()
 
 		CatalogManager cat;
 		attribute_name = temp[1];
-		Condition con;
-		Table tab;
+
 		int attr_no;
 		
 		tab = cat.getTable_info(table_name);
@@ -720,14 +810,15 @@ void Interpreter::Delete()
 			con.value = temp[3].substr(1, temp[3].length() - 2);
 		else
 			con.value = temp[3];
-
+		*/
 		//cout << con.op << con.value << endl;
 
 		//再加一个删除某些值的接口
 		//table_name,attribute_name,Condition con都已经储存完毕，con里的value也是以字符串形式存储的
 		//例如delete from student where sno = '88888888'; 中 con的value是 88888888 已经把单引号全部去掉了
 
-		//先暂时只给一个condition
+		Condition con;
+		Table tab;
 		vector <Condition> cons;
 		size_t conditionStart = query.find("where")+5;
 		size_t subStart = conditionStart ;
@@ -800,17 +891,29 @@ void Interpreter::Quit()
 
 void Interpreter::Execfile()
 {
-	cout << "Execfile" << endl;
+
 
 	string file_name = query.substr(9, query.length() - 10);
 	ifstream file(file_name);
-	if (!file)
+	if (file.fail())
 	{
 		//throw Exception("The File Does Not Exist");
 		cout << "The File Does Not Exist" << endl;
 	}
-	while (getline(file, query))
+	query.clear();
+	while (!file.eof())
+	{
+		do
+		{
+			string s;
+			getline(file, s);
+			query += s;
+
+		} while (query.find(";") == string::npos);
 		Choice();
+		query.clear();
+	}
+
 }
 
 int Interpreter::Next(int i)
