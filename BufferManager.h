@@ -43,9 +43,8 @@ public:
     Page& recordManagerGetBlankPage();
     bool pinPage( Page& );
     bool unpinPage( Page& );
-
+    PageIndex findPageInCache(Page&);
 private:
-    PageIndex findPageInCache( Page& );
     bool forceReadPageFromFile( Page& );
     bool forceWritePageToFile( Page& );
     void lruCounterAddExceptCurrent( int );

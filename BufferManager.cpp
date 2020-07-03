@@ -31,6 +31,8 @@ bool BufferManager::readPage( Page& page )
             // use the new page to replace the page
             cachePages[pageIndex] = page;
             lruCounterAddExceptCurrent(pageIndex);
+            //cout << (void*)page.pageData<<endl;
+            //cout << (void*)cachePages[pageIndex].pageData<<endl;
             return true;
         }        
     }
@@ -121,14 +123,33 @@ void BufferManager::lruCounterAddExceptCurrent( int index )
 bool BufferManager::forceReadPageFromFile( Page& page )
 {
     string filename = (page.tableName + "." + "record");
+    Page temp;    
     FILE* fp = fopen(filename.c_str(), "rb");
     if (fp) {
         fseek(fp, PAGE_SIZE * page.ofs, SEEK_SET);
-	    fread( page.pageData, PAGE_SIZE, SEEK_CUR, fp);
+        
+	    fread( temp.pageData, PAGE_SIZE, SEEK_CUR, fp);
 	    fclose(fp);
+
+        temp.ofs = page.ofs;
+        temp.pageIndex = page.pageIndex;
+        temp.pageType = page.pageType;
+        temp.tableName = page.tableName;
+        page = temp;
         return true;
     }
-    return false;
+    
+    /*
+    fstream file(filename, ios::out | ios::in);
+    if (file.fail())
+        return false;
+    file.seekp(PAGE_SIZE * page.ofs,ios::beg);
+    if (!file.eof()) {
+        file.read(temp.pageData, PAGE_SIZE);
+    }
+    file.close();
+    */
+    return true;
 }
 
 bool BufferManager::forceWritePageToFile( Page& page )
@@ -139,9 +160,21 @@ bool BufferManager::forceWritePageToFile( Page& page )
         fseek(fp, PAGE_SIZE * page.ofs, SEEK_SET);
 		fwrite( page.pageData, PAGE_SIZE, SEEK_CUR, fp);
 		fclose(fp);
-        return true;
+       //delete& page;
+       return true;
 	}
     return false;
+    
+   
+   /*
+    ofstream output(filename, ios::out);
+    if (output.fail())
+        return false;
+    output.seekp(PAGE_SIZE * page.ofs, ios::beg);
+    output.write(page.pageData, PAGE_SIZE);
+    output.close();
+    return true;
+    */
 }
 
 PageIndex BufferManager::getUnpinedBiggestPageFromCache()
