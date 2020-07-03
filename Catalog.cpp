@@ -104,20 +104,20 @@ void CatalogManager::createTable(Table& table)
 		Tables.push_back(table);
 	}
 	index.CreateIndex(table);
-	Index newindex;
-	newindex.table_name = table.name;
-	for (size_t i = 0; i < table.attributes.size(); i++)
-	{
-		if (table.attributes[i].isPrimaryKey)
-		{
-			newindex.index_name = table.attributes[i].name;
-			newindex.column = i;
-			newindex.columnLength = table.attributes[i].length;
-			newindex.attribute_name = table.attributes[i].name;
-			break;
-		}
-	}
-	createIndex(newindex);
+	//Index newindex;
+	//newindex.table_name = table.name;
+	//for (size_t i = 0; i < table.attributes.size(); i++)
+	//{
+	//	if (table.attributes[i].isPrimaryKey)
+	//	{
+	//		newindex.index_name = table.attributes[i].name;
+	//		newindex.column = i;
+	//		newindex.columnLength = table.attributes[i].length;
+	//		newindex.attribute_name = table.attributes[i].name;
+	//		break;
+	//	}
+	//}
+	//createIndex(newindex);
 	FILE* newfile;
 	string filename = table.name + ".record";
 	newfile=fopen(filename.c_str(),"wb");
