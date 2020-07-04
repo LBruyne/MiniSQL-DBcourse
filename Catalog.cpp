@@ -141,10 +141,6 @@ void CatalogManager::createIndex(Index index)
 	}
 }
 
-void CatalogManager::dropTable(Table table)
-{
-	dropTable(table.name);
-}
 
 void CatalogManager::dropTable(string table_name)
 {
@@ -174,11 +170,6 @@ void CatalogManager::dropTable(string table_name)
 			}
 		}
 	}
-}
-
-void CatalogManager::dropIndex(Index index) 
-{
-	dropIndex(index.index_name);
 }
 
 void CatalogManager::dropIndex(string index_name) 
