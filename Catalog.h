@@ -7,7 +7,6 @@ private:
 
 	int tableNum;
 	vector<Table> Tables;		//用于存储table信息
-
 	int indexNum;
 	vector<Index> Indexes;		//用于存储index信息	
 	                	
@@ -57,10 +56,6 @@ public:
 	int getAttr_no(Table& table, string attr_name);
 
 	int getAttr_size(Table& table);
-
-	void ShowTableCatalog();
-
-	void ShowIndexCatalog();
 
 	void clear();
 
