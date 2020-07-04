@@ -1,7 +1,8 @@
 #include"Catalog.h"
 #include "IndexManager.h"
 extern IndexManager index;
-void CatalogManager::readTable() {
+void CatalogManager::readTable() 
+{
 	const string filename = "table.catlog";
 	fstream  fin(filename.c_str(), ios::in);
 	fin >> tableNum;
@@ -28,7 +29,8 @@ void CatalogManager::readTable() {
 	fin.close();
 }
 
-void CatalogManager::readIndex() {
+void CatalogManager::readIndex() 
+{
 	const string filename = "index.catlog";
 	fstream  fin(filename.c_str(), ios::in);
 	fin >> indexNum;
@@ -267,48 +269,7 @@ int CatalogManager::getAttr_size(Table& table)
 	return table.attributes.size();
 }
 
-//debug专用
-void CatalogManager::ShowTableCatalog() 
-{
-	cout << "DEBUG:" << endl;
-	cout << "Number of Tables:" << tableNum << endl;
-	for (int i = 0; i < tableNum; i++)
-	{
-		cout << "TABLE " << i << endl;
-		cout << "Table Name: " << Tables[i].name << endl;
-		cout << "Number of attributes: " << Tables[i].attriNum << endl;
-		cout << "Number of blocks occupied in disk: " << Tables[i].blockNum << endl;
-		for (int j = 0; j < Tables[i].attriNum; j++)
-		{
-			cout << Tables[i].attributes[j].name << "\t";
-			switch (Tables[i].attributes[j].type)
-			{
-			case CHAR:	cout << "CHAR(" << Tables[i].attributes[j].length << ")\t";	break;
-			case INT:	cout << "INT\t";		break;
-			case FLOAT:	cout << "FLOAT\t";	break;
-			default:	cout << "UNKNOW TYPE\t";	break;
-			}
-			if (Tables[i].attributes[j].isUnique)	cout << "Unique\t";
-			else cout << "NotUnique ";
-			if (Tables[i].attributes[j].isPrimaryKey) cout << "PrimeryKey\t" << endl;
-			else cout << endl;
-		}
-	}
-}
 
-void CatalogManager::ShowIndexCatalog() 
-{
-	cout << "DEBUG:" << endl;
-	cout << "Number of Indexes:" << indexNum << endl;
-	for (int i = 0; i < indexNum; i++)
-	{
-		cout << "INDEX " << i << endl;
-		cout << "Index Name: " << Indexes[i].index_name << endl;
-		cout << "Table Name: " << Indexes[i].table_name << endl;
-		cout << "Column Number: " << Indexes[i].column << endl;
-		cout << "Column Number of blocks occupied in disk: " << Indexes[i].blockNum << endl;
-	}
-}
 
 void CatalogManager::changeTable(Table& T) {
 	for (int i = 0; i < tableNum; i++)
