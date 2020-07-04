@@ -23,6 +23,7 @@ public:
 	using TableResult = RecordResult;
 	TableResult create(Table& T);
 	TableResult drop(const Table& T);
+	void createIndex(Table&, Index&);
 
 private:
 	void SetCondition(bool&, vector<Condition>&,char);
@@ -43,6 +44,7 @@ private:
 	inline bool testifyOneRow(Row&, vector<Condition>&, bool&,Table&);
 	void deleteIndex(Table&, Row&);
 	inline void insertIndex(Table&, Row&,const Pointer&);
+	inline void insertIndex(Table&, Row&, const Pointer&,string&);
 	inline void checkDuplicate(Table&, vector<string>&, RecordResult&);
 
 };

@@ -220,7 +220,7 @@ int BPlusTree<T>::_Find(const T& data, Node<T>* node) {
 
 template<class T>
 void BPlusTree<T>::Insert(const T& data, const Pointer& pointer) {
-	Node<T>* node;
+	Node<T>* node=nullptr;
 	if (!this->root) {
 		this->root = new Node<T>(this->MaxChildrens);
 		node = this->root;
@@ -393,7 +393,8 @@ void BPlusTree<T>::Delete(T& data) {
 	int i;
 	if (root == NULL)
 		return;
-	Node<T>* node = _FindPosition(data);
+	Node<T>* node = nullptr;
+	node=_FindPosition(data);
 	if (!node)
 		return;
 	_DeleteKey(node, data);

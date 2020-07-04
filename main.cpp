@@ -5,9 +5,10 @@
 #include"Interpreter.h"
 #include"BufferManager.h"
 #include"Page.h"
-
+#include <time.h>
 using namespace std;
-
+bool infile = 0;
+long long start, endtime;
 int BufferManager::		lruCounter[CACHE_CAPACITY];
 Page BufferManager::	cachePages[CACHE_CAPACITY];
 bool BufferManager::	pined[CACHE_CAPACITY];
@@ -22,7 +23,6 @@ BufferManager buf;
 
 int main()
 {
-
 	bool execfile = false;
 	static auto _ = []()
 	{
@@ -35,9 +35,12 @@ int main()
 	{
 		cout << "MINI SQL >>>" << ends;
 		i.Query();
-		if(i.query!="")
-		i.Choice();
+		if (i.query != "")
+			//此处开始计时
+		{
+			i.Choice();
+		}
+		//此处输出时间，choice里面开始计算
 	}
-	system("pause");
 	return 0;
 }

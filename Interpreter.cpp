@@ -5,12 +5,15 @@
 #include"Interpreter.h"
 #include"BufferManager.h"
 #include"Page.h"
+#include <time.h>
 extern Interpreter i;
 extern RecordManager record;
 extern IndexManager index;
 extern CatalogManager catalog;
 extern BufferManager buf;
-using namespace std;
+
+extern long long  start, endtime;
+extern bool infile;
 void Interpreter::Query()
 {
 	string s;
@@ -30,33 +33,130 @@ inline string Interpreter::getQ() {
 
 void Interpreter::Choice()
 {
-	cout << query << endl;
+	double dura;
+	//cout << query << endl;
+	if (query.length()>=5&&query.substr(0,5)=="clear") {
+		system("cls");
+		return;
+	}
+
 	if (query.substr(0, 6) == "select")
-		Select();
+	{
+		if (!infile) {
+			start = clock();
+			Select();
+			endtime = clock();
+			dura = (endtime - start) * 1.0 / CLOCKS_PER_SEC;
+			cout << "This operation takes " << dura << " seconds" << endl;
+		}
+		else
+			Select();
+	}
 
 	else if (query.substr(0, 10) == "drop table")
-		Drop_Table();
+		 {
+		if (!infile) {
+			start = clock();
+			Drop_Table();
+			endtime = clock();
+			dura = (endtime - start) * 1.0 / CLOCKS_PER_SEC;
+			cout << "This operation takes " << dura << " seconds" << endl;
+		}
+		else
+			Drop_Table();
+	}
 
 	else if (query.substr(0, 10) == "drop index")
-		Drop_Index();
+		
+	{
+		if (!infile) {
+			start = clock();
+			Drop_Index();
+			endtime = clock();
+			dura = (endtime - start) * 1.0 / CLOCKS_PER_SEC;
+			cout << "This operation takes " << dura << " seconds" << endl;
+		}
+		else
+			Drop_Index();
+	}
 
 	else if (query.substr(0, 6) == "insert")
-		Insert();
+		{
+		if (!infile) {
+			start = clock();
+			Insert();
+			endtime = clock();
+			dura = (endtime - start) * 1.0 / CLOCKS_PER_SEC;
+			cout << "This operation takes " << dura << " seconds" << endl;
+		}
+		else
+			Insert();
+	}
+
 
 	else if (query.substr(0, 12) == "create table")
-		Create_Table();
+	{
+		if (!infile) {
+
+			start = clock();
+			Create_Table();
+			endtime = clock();
+			dura = (endtime - start) * 1.0 / CLOCKS_PER_SEC;
+			cout << "This operation takes " << dura << " seconds" << endl;
+		}
+		else
+			Create_Table();
+	}
 
 	else if (query.substr(0, 12) == "create index")
-		Create_Index();
+		
+	{
+		if (!infile) {
 
+			start = clock();
+			Create_Index(); 
+			endtime = clock();
+			dura = (endtime - start) * 1.0 / CLOCKS_PER_SEC;
+			cout << "This operation takes " << dura << " seconds" << endl;
+		}
+		else
+			Create_Index();
+	}
 	else if (query.substr(0, 11) == "delete from")
-		Delete();
+		{
+		if (!infile) {
+
+			start = clock();
+			Delete();
+			endtime = clock();
+			dura = (endtime - start) * 1.0 / CLOCKS_PER_SEC;
+			cout << "This operation takes " << dura << " seconds" << endl;
+		}
+		else
+			Delete();
+	}
 
 	else if (query.substr(0, 4) == "quit")
 		Quit();
 
 	else if (query.substr(0, 8) == "execfile")
-		Execfile();
+		 {
+		if (!infile) {
+
+			start = clock();
+			infile = 1;
+			Execfile();
+			infile = 0;
+			endtime = clock();
+			dura = (endtime - start) * 1.0 / CLOCKS_PER_SEC;
+			cout << "This operation takes " << dura << " seconds" << endl;
+		}
+		else {
+			
+			Execfile();
+		}
+
+	}
 
 	else
 	{
@@ -199,7 +299,7 @@ void Interpreter::Create_Table()
 	//	cout << tab.attributes[k].name <<" "<<tab.attributes[k].isUnique<< " " << tab.attributes[k].isPrimaryKey<<" " << tab.attributes[k].type<< endl;
 	//再接一个Catalog接口
 
-	cout << "Create_Table" << endl;
+	//cout << "Create_Table" << endl;
 
 	Table tab;
 	string keyword;
@@ -270,7 +370,7 @@ void Interpreter::Create_Table()
 void Interpreter::Create_Index()	
 {
 	//create index 格式: 左右括号分别都要加空格，详见参考文档//例子：create index stunameidx on student ( sname );
-	cout << "Create_Index" << endl;
+	//cout << "Create_Index" << endl;
 	/*
 	string temp[4];					//create index 后有四个单词，如：create index stunameidx on student (sname)，四个单词分别是stunameidx、on、student和(sname)
 	int i, j, length;
@@ -326,12 +426,14 @@ void Interpreter::Create_Index()
 	index.CreateIndex(tab,id);
 	catalog.createIndex(id);
 	catalog.reload();
+	record.createIndex(tab, id);
+	
 	cout << "Succeed to create index " +id.index_name+" ."<< endl;
 }
 
 void Interpreter::Drop_Table()
 {
-	cout << "Drop_Table" << endl;
+	//cout << "Drop_Table" << endl;
 
 	string table_name;
 	table_name = query.substr(10);
@@ -358,7 +460,7 @@ void Interpreter::Drop_Table()
 
 void Interpreter::Drop_Index()
 {
-	cout << "Drop_Index" << endl;
+	//cout << "Drop_Index" << endl;
 
 	string index_name;
 	index_name = query.substr(10);
@@ -383,7 +485,7 @@ void Interpreter::Drop_Index()
 
 void Interpreter::Select()
 {
-	cout << "Select" << endl;
+	//cout << "Select" << endl;
 
 	//if (query.substr(0, 13) != "select * from")
 	//{
@@ -611,7 +713,7 @@ void Interpreter::Select()
 void Interpreter::Insert()
 {
 	//Insert 格式：insert into student values ('12345678','y',22,'M'); values与括号有空格，括号内容不得有空格
-	cout << "Insert" << endl;
+	//cout << "Insert" << endl;
 
 	string table_name;
 	table_name = query=query.substr(11);
@@ -733,7 +835,7 @@ void Interpreter::Insert()
 	}
 	else
 	{
-		cout << "Successful insertion" << endl;
+		;//cout << "Successful insertion" << endl;
 	}
 	//再加一个他接口
 	//内容全部保存在Value里面，是一个字符串的容器，所有类型都是以字符串形式存储起来
@@ -741,7 +843,7 @@ void Interpreter::Insert()
 
 void Interpreter::Delete()
 {
-	cout << "Delete" << endl;
+	//cout << "Delete" << endl;
 
 	int i, j, length;
 	string table_name,attribute_name;
