@@ -37,10 +37,6 @@ public:
 
 	void createIndex(Index index);
 
-	void dropTable(Table table);
-
-	void dropIndex(Index index);
-
 	void dropTable(string table_name);
 
 	void dropIndex(string index_name);
